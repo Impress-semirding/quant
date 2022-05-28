@@ -1,0 +1,3 @@
+[submodule "goex"]
+	path = goex
+	url = https://github.com/nntaoli-project/goex.git
