@@ -49,3 +49,5 @@ require (
 )
 
 replace github.com/nntaoli-project/goex => ./goex
+
+replace github.com/nntaoli-project/goex/builder => ./goex/builder
