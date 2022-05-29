@@ -1,6 +1,7 @@
 package trader
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -12,11 +13,19 @@ import (
 
 // Trader Variable
 var (
-	Executor      = make(map[int64]*Global) //保存正在运行的策略，防止重复运行
-	errHalt       = fmt.Errorf("HALT")
-	exchangeMaker = map[string]func(api.Option) api.Exchange{ //保存所有交易所的构造函数
+	Executor = make(map[int64]*Global) //保存正在运行的策略，防止重复运行
+	errHalt  = fmt.Errorf("HALT")
+	// exchangeMaker = map[string]func(api.Option) api.Exchange{ //保存所有交易所的构造函数
+	// 	constant.Okex: api.NewOKEX,
+	// }
+
+	okexMaker = map[string]func(api.Option) *api.OKEX{ //保存所有交易所的构造函数
 		constant.Okex: api.NewOKEX,
 	}
+
+	// exchangeMakeDynamic = map[string]func(api.Option) interface{}{ //保存所有交易所的构造函数
+	// 	constant.Okex: api.NewOKEXFuture,
+	// }
 )
 
 // GetTraderStatus ...
@@ -70,8 +79,9 @@ func initialize(id int64) (trader Global, err error) {
 	for _, c := range constant.Consts {
 		trader.ctx.Set(c, c)
 	}
+
 	for _, e := range es {
-		if maker, ok := exchangeMaker[e.Type]; ok {
+		if maker, ok := okexMaker[e.Type]; ok {
 			opt := api.Option{
 				TraderID:   trader.ID,
 				Type:       e.Type,
@@ -81,22 +91,56 @@ func initialize(id int64) (trader Global, err error) {
 				Passphrase: e.Passphrase,
 				Test:       e.Test,
 			}
-			trader.es = append(trader.es, maker(opt))
+			trader.okex = append(trader.okex, maker(opt))
 		}
 	}
-	if len(trader.es) == 0 {
+	if len(trader.okex) == 0 && len(trader.es) == 0 {
 		err = fmt.Errorf("Please add at least one exchange")
 		return
 	}
+
 	trader.ctx.Set("Global", &trader)
 	trader.ctx.Set("G", &trader)
-	trader.ctx.Set("Exchange", trader.es[0])
-	trader.ctx.Set("E", trader.es[0])
-	trader.ctx.Set("Exchanges", trader.es)
-	trader.ctx.Set("Es", trader.es)
+	// trader.ctx.Set("Exchange", trader.es[0])
+	// trader.ctx.Set("E", trader.es[0])
+	// trader.ctx.Set("Exchanges", trader.es)
+	// trader.ctx.Set("Es", trader.es)
 	trader.ctx.Set("Talib", Talib{})
+	// trader.ctx.Set("runExchange", runExchange(trader.ctx, trader.es[0]))
+	trader.ctx.Set("Okex", trader.okex[0])
 	return
 }
+
+// func runExchange(vm *otto.Otto, api api.Exchange) func(call otto.FunctionCall) otto.Value {
+// 	return func(call otto.FunctionCall) otto.Value {
+// 		method, err := call.Argument(0).ToString()
+// 		var args []otto.Value
+// 		if len(call.ArgumentList) > 0 {
+// 			args = call.ArgumentList[1:]
+// 		}
+// 		if err != nil {
+// 			result, _ := vm.ToValue("method provide error")
+// 			return result
+// 		}
+
+// 		fmt.Println(args)
+
+// 		var result interface{}
+// 		switch method {
+// 		case "GetTicker":
+// 			result, _ = api.GetTicker(goex.BTC_USDT)
+// 		case "GetCurrencyPair":
+// 			result, _ = vm.ToValue(goex.BTC_USDT)
+// 		}
+
+// 		data, err := toMap(result)
+// 		if err != nil {
+// 			return otto.Value{}
+// 		}
+// 		val, _ := vm.ToValue(data)
+// 		return val
+// 	}
+// }
 
 // run ...
 func run(id int64) (err error) {
@@ -160,3 +204,13 @@ func stop(id int64) (err error) {
 //		}
 //	}
 //}
+
+func toMap(input interface{}) (map[string]interface{}, error) {
+	data := make(map[string]interface{})
+	j, _ := json.Marshal(input)
+	if err := json.Unmarshal(j, &data); err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}

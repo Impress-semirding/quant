@@ -1,19 +1,18 @@
 package api
 
 import (
+	"net/http"
+	"net/url"
+	"os"
 	"time"
 
 	"github.com/miaolz123/conver"
 	"github.com/phonegapX/QuantBot/constant"
 	"github.com/phonegapX/QuantBot/model"
+	"github.com/phonegapX/QuantBot/utils"
 
 	"github.com/nntaoli-project/goex"
-	"github.com/nntaoli-project/goex/builder"
-)
-
-const (
-	message = "hello world!"
-	secret  = "0933e54e76b24731a2d84b6b463ec04c"
+	"github.com/nntaoli-project/goex/okex/v5"
 )
 
 // OKEX the exchange struct of okex.com
@@ -30,30 +29,52 @@ type OKEX struct {
 	limit     float64
 	lastSleep int64
 	lastTimes int64
-	goex.API
+	*okex.OKExV5
 }
 
-var mgnModes map[string]bool = map[string]bool{
-	"cross":    true,
-	"isolated": true,
-}
+func NewOKEX(opt Option) *OKEX {
+	os.Setenv("HTTP_PROXY", "http://127.0.0.1:8001")
+	os.Setenv("HTTPS_PROXY", "http://127.0.0.1:8001")
+	config := goex.APIConfig{
+		Endpoint:      "https://www.okx.com",
+		ApiKey:        opt.AccessKey,
+		ApiSecretKey:  opt.SecretKey,
+		ApiPassphrase: opt.Passphrase,
+	}
 
-// NewOKEX create an exchange struct of okex.com
-func NewOKEX(opt Option) Exchange {
-	apiKey := opt.AccessKey
-	secretKey := opt.SecretKey
-	passphrase := opt.Passphrase
-	api := builder.DefaultAPIBuilder.HttpProxy("http://127.0.0.1:8001").APIKey(apiKey).APISecretkey(secretKey).ApiPassphrase(passphrase).Build(goex.OKEX) //创建现货api实例
-	ok := &OKEX{
+	config.HttpClient = &http.Client{}
+	// if opt.HttpProxy != "" {
+	// 	config.HttpClient = &http.Client{
+	// 		Transport: &http.Transport{
+	// 			Proxy: func(req *http.Request) (*url.URL, error) {
+	// 				return &url.URL{
+	// 					Scheme: "socks5",
+	// 					Host:   opt.HttpProxy,
+	// 				}, nil
+	// 			},
+	// 		},
+	// 	}
+	// } else {
+	// 	config.HttpClient = &http.Client{
+	// 		Transport: &http.Transport{
+	// 			Proxy: func(req *http.Request) (*url.URL, error) {
+	// 				return &url.URL{
+	// 					Scheme: "socks5",
+	// 					Host:   "https://127.0.0.1:8001",
+	// 				}, nil
+	// 			},
+	// 		},
+	// 	}
+	// }
+
+	apiClient := okex.NewOKExV5(&config)
+
+	return &OKEX{
 		stockTypeMap: map[string]string{
-			"BTC/USDT":      "BTC-USDT",
-			"ETH/USDT":      "ETH-USDT",
-			"EOS/USDT":      "eos_usdt",
-			"ONT/USDT":      "ont_usdt",
-			"QTUM/USDT":     "qtum_usdt",
-			"ONT/ETH":       "ont_eth",
-			"BTC/USD/SWAP":  "BTC-USD-SWAP",
-			"BTC/USDT/SWAP": "BTC-USDT-SWAP",
+			"BTC-USDT":      "BTC-USDT",
+			"ETH-USDT":      "ETH-USDT",
+			"BTC-USD-SWAP":  "BTC-USD-SWAP",
+			"BTC-USDT-SWAP": "BTC-USDT-SWAP",
 		},
 		tradeTypeMap: map[string]string{
 			"buy":         constant.TradeTypeBuy,
@@ -79,18 +100,13 @@ func NewOKEX(opt Option) Exchange {
 			"QTUM/USDT": 0.001,
 			"ONT/ETH":   0.001,
 		},
-		records: make(map[string][]Record),
-		// host:    "https://www.okex.com/api/v1/",
-		host:   "https://www.okx.com/api/v5/",
-		logger: model.Logger{TraderID: opt.TraderID, ExchangeType: opt.Type},
-		option: opt,
-
+		records:   make(map[string][]Record),
+		logger:    model.Logger{TraderID: opt.TraderID, ExchangeType: opt.Type},
+		option:    opt,
 		limit:     10.0,
 		lastSleep: time.Now().UnixNano(),
-		API:       api,
+		OKExV5:    apiClient,
 	}
-
-	return ok
 }
 
 // Log print something to console
@@ -128,4 +144,56 @@ func (e *OKEX) AutoSleep() {
 // GetMinAmount get the min trade amonut of this exchange
 func (e *OKEX) GetMinAmount(stock string) float64 {
 	return e.minAmountMap[stock]
+}
+
+//	获取单个产品行情信息
+func (e *OKEX) GetTicker(instId string) interface{} {
+	if _, ok := e.stockTypeMap[instId]; !ok {
+		e.Log("error instId not in stockTypeMap")
+		return nil
+	}
+	tickets, err := e.OKExV5.GetTickerV5(instId)
+	if err != nil {
+		e.Log("error", err)
+		return nil
+	}
+
+	data, _ := utils.ToMapJson(tickets)
+	return data
+}
+
+func (e *OKEX) GetKlineRecords(instId string, period int, options ...utils.OptionalParameter) []Record {
+	if _, ok := e.stockTypeMap[instId]; !ok {
+		e.Log("error instId not in stockTypeMap")
+		return nil
+	}
+
+	param := &url.Values{}
+	utils.MergeOptionalParameter(param, options...)
+
+	tickets, err := e.OKExV5.GetKlineRecordsV5(instId, goex.KlinePeriod(period), param)
+	if err != nil {
+		e.Log("error", err)
+		return nil
+	}
+
+	recordsNew := []Record{}
+	for _, v := range tickets {
+		recordsNew = append([]Record{{
+			Time:   conver.Int64Must(v[0]),
+			Open:   conver.Float64Must(v[1]),
+			High:   conver.Float64Must(v[2]),
+			Low:    conver.Float64Must(v[3]),
+			Close:  conver.Float64Must(v[4]),
+			Volume: conver.Float64Must(v[5]),
+		}}, recordsNew...)
+	}
+
+	return recordsNew
+
+	// json, err := simplejson.NewJson(tickets)
+	// if err != nil {
+	// e.logger.Log(constant.ERROR, "", 0.0, 0.0, "GetRecords() error, ", err)
+	// return false
+	// }
 }

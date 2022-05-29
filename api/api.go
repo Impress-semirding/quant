@@ -11,6 +11,8 @@ type Option struct {
 	SecretKey  string
 	Passphrase string
 	Test       string
+	HttpProxy  string
+	HttpsProxy string
 }
 
 // Exchange interface

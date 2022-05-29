@@ -23,7 +23,8 @@ type Global struct {
 	Logger  model.Logger   //利用这个对象保存日志
 	ctx     *otto.Otto     //js虚拟机
 	es      []api.Exchange //交易所列表
-	tasks   Tasks          //任务列表
+	okex    []*api.OKEX
+	tasks   Tasks //任务列表
 	running bool
 	//statusLog string
 }
