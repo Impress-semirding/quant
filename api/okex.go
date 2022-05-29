@@ -197,3 +197,63 @@ func (e *OKEX) GetKlineRecords(instId string, period int, options ...utils.Optio
 	// return false
 	// }
 }
+
+func (e *OKEX) Trade(options utils.OptionalParameter) interface{} {
+	instId, _ := options["instId"].(string)
+	tdMode, _ := options["tdMode"].(string)
+	side, _ := options["side"].(string)
+	ordType, _ := options["ordType"].(string)
+	sz, _ := options["sz"].(string)
+	price, _ := options["px"].(string)
+
+	if instId == "" {
+		e.Log("error, need provider instId")
+		return nil
+	}
+
+	if tdMode == "" {
+		e.Log("error, need provider instId")
+		return nil
+	}
+	if side == "" {
+		e.Log("error, need provider instId")
+		return nil
+	}
+
+	if ordType == "" {
+		e.Log("error, need provider instId")
+		return nil
+	}
+
+	if sz == "" {
+		e.Log("error, need provider instId")
+		return nil
+	}
+
+	if price == "" {
+		e.Log("error, need provider instId")
+		return nil
+	}
+
+	params := &okex.CreateOrderParam{
+		Symbol:    instId,
+		TradeMode: tdMode,
+		Side:      side,
+		OrderType: ordType,
+		Size:      sz,
+		Price:     price,
+		PosSide:   "short",
+	}
+	res, err := e.CreateOrder(params)
+	if err != nil {
+		e.Log("error, need provider instId")
+		return nil
+	}
+
+	if res.SCode != "0" {
+		e.Log("error, 下单失败")
+		return nil
+	}
+	// return res
+	return res.OrdId
+}
