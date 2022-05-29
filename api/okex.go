@@ -257,3 +257,14 @@ func (e *OKEX) Trade(options utils.OptionalParameter) interface{} {
 	// return res
 	return res.OrdId
 }
+
+func (e *OKEX) GetAccountPosition(options ...map[string]interface{}) interface{} {
+	res, err := e.OKExV5.GetAccountPosition()
+
+	if err != nil {
+		e.Log("error, need provider instId")
+		return nil
+	}
+
+	return res
+}
