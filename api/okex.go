@@ -152,6 +152,7 @@ func (e *OKEX) GetTicker(instId string) interface{} {
 		e.Log("error instId not in stockTypeMap")
 		return nil
 	}
+	e.updateLastTime()
 	tickets, err := e.OKExV5.GetTickerV5(instId)
 	if err != nil {
 		e.Log("error", err)
@@ -168,6 +169,7 @@ func (e *OKEX) GetKlineRecords(instId string, period int, options ...utils.Optio
 		return nil
 	}
 
+	e.updateLastTime()
 	param := &url.Values{}
 	utils.MergeOptionalParameter(param, options...)
 
@@ -205,6 +207,7 @@ func (e *OKEX) Trade(options utils.OptionalParameter) interface{} {
 	ordType, _ := options["ordType"].(string)
 	sz, _ := options["sz"].(string)
 	price, _ := options["px"].(string)
+	posSide, _ := options["posSide"].(string)
 
 	if instId == "" {
 		e.Log("error, need provider instId")
@@ -235,6 +238,7 @@ func (e *OKEX) Trade(options utils.OptionalParameter) interface{} {
 		return nil
 	}
 
+	e.updateLastTime()
 	params := &okex.CreateOrderParam{
 		Symbol:    instId,
 		TradeMode: tdMode,
@@ -242,11 +246,11 @@ func (e *OKEX) Trade(options utils.OptionalParameter) interface{} {
 		OrderType: ordType,
 		Size:      sz,
 		Price:     price,
-		PosSide:   "short",
+		PosSide:   posSide,
 	}
 	res, err := e.CreateOrder(params)
 	if err != nil {
-		e.Log("error, need provider instId")
+		e.Log(err)
 		return nil
 	}
 
@@ -259,6 +263,7 @@ func (e *OKEX) Trade(options utils.OptionalParameter) interface{} {
 }
 
 func (e *OKEX) GetAccountPosition(options ...map[string]interface{}) interface{} {
+	e.updateLastTime()
 	res, err := e.OKExV5.GetAccountPosition()
 
 	if err != nil {
@@ -267,4 +272,8 @@ func (e *OKEX) GetAccountPosition(options ...map[string]interface{}) interface{}
 	}
 
 	return res
+}
+
+func (e *OKEX) updateLastTime() {
+	e.lastTimes++
 }
