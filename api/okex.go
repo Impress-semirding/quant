@@ -3,7 +3,6 @@ package api
 import (
 	"net/http"
 	"net/url"
-	"os"
 	"time"
 
 	"github.com/Impress-semirding/quant/constant"
@@ -33,8 +32,7 @@ type OKEX struct {
 }
 
 func NewOKEX(opt Option) *OKEX {
-	os.Setenv("HTTP_PROXY", "http://127.0.0.1:8001")
-	os.Setenv("HTTPS_PROXY", "http://127.0.0.1:8001")
+	setProxy()
 	config := goex.APIConfig{
 		Endpoint:      "https://www.okx.com",
 		ApiKey:        opt.AccessKey,
