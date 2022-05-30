@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/phonegapX/QuantBot/api"
-	"github.com/phonegapX/QuantBot/constant"
-	"github.com/phonegapX/QuantBot/model"
+	"github.com/Impress-semirding/quant/api"
+	"github.com/Impress-semirding/quant/constant"
+	"github.com/Impress-semirding/quant/model"
 	"github.com/robertkrimen/otto"
 )
 

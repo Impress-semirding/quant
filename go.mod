@@ -1,4 +1,4 @@
-module github.com/phonegapX/QuantBot
+module github.com/Impress-semirding/quant
 
 go 1.18
 

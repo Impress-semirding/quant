@@ -7,11 +7,12 @@ import (
 
 	"github.com/hprose/hprose-golang/io"
 	"github.com/jinzhu/gorm"
+
 	// for db SQL
+	"github.com/Impress-semirding/quant/config"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/phonegapX/QuantBot/config"
 )
 
 var (

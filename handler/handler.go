@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Impress-semirding/quant/config"
+	"github.com/Impress-semirding/quant/constant"
 	"github.com/hprose/hprose-golang/rpc"
-	"github.com/phonegapX/QuantBot/config"
-	"github.com/phonegapX/QuantBot/constant"
 )
 
 type response struct {

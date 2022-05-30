@@ -8,10 +8,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Impress-semirding/quant/api"
+	"github.com/Impress-semirding/quant/constant"
+	"github.com/Impress-semirding/quant/model"
 	"github.com/miaolz123/conver"
-	"github.com/phonegapX/QuantBot/api"
-	"github.com/phonegapX/QuantBot/constant"
-	"github.com/phonegapX/QuantBot/model"
 	"github.com/robertkrimen/otto"
 )
 

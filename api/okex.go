@@ -6,10 +6,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/Impress-semirding/quant/constant"
+	"github.com/Impress-semirding/quant/model"
+	"github.com/Impress-semirding/quant/utils"
 	"github.com/miaolz123/conver"
-	"github.com/phonegapX/QuantBot/constant"
-	"github.com/phonegapX/QuantBot/model"
-	"github.com/phonegapX/QuantBot/utils"
 
 	"github.com/nntaoli-project/goex"
 	"github.com/nntaoli-project/goex/okex/v5"

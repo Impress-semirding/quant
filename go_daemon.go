@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/phonegapX/QuantBot/handler"
+	"github.com/Impress-semirding/quant/handler"
 	"github.com/sevlyar/go-daemon"
 )
 

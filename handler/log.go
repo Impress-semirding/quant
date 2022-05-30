@@ -3,9 +3,9 @@ package handler
 import (
 	"fmt"
 
+	"github.com/Impress-semirding/quant/constant"
+	"github.com/Impress-semirding/quant/model"
 	"github.com/hprose/hprose-golang/rpc"
-	"github.com/phonegapX/QuantBot/constant"
-	"github.com/phonegapX/QuantBot/model"
 )
 
 type logger struct{}
