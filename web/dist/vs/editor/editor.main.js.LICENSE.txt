@@ -1,0 +1,42 @@
+/*!
+    * string_score.js: String Scoring Algorithm 0.1.22
+    *
+    * http://joshaven.com/string_score
+    * https://github.com/joshaven/string_score
+    *
+    * Copyright (C) 2009-2014 Joshaven Potter <yourtech@gmail.com>
+    * Special thanks to all of the contributors listed here https://github.com/joshaven/string_score
+    * MIT License: http://opensource.org/licenses/MIT
+    *
+    * Date: Tue Mar 1 2011
+    * Updated: Tue Mar 10 2015
+    */
+
+/*!
+    BEGIN THIRD PARTY
+    */
+
+/*!
+END THIRD PARTY
+*/
+
+/*!-----------------------------------------------------------
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Version: 0.7.3(14ab24ad53d8d969e86bae0096ecc3b954d0faa0)
+ * Released under the MIT license
+ * https://github.com/Microsoft/vscode/blob/master/LICENSE.txt
+ *-----------------------------------------------------------*/
+
+/*!-----------------------------------------------------------------------------
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * monaco-languages version: 0.6.0(4dd22f337d2512d8bb03edfdb565ebe2529b7f84)
+ * Released under the MIT license
+ * https://github.com/Microsoft/monaco-languages/blob/master/LICENSE.md
+ *-----------------------------------------------------------------------------*/
+
+/*!-----------------------------------------------------------------------------
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * monaco-typescript version: 2.0.1(3b2c5f3f3279a3d89ded6551633e757e9aa697a5)
+ * Released under the MIT license
+ * https://github.com/Microsoft/monaco-typescript/blob/master/LICENSE.md
+ *-----------------------------------------------------------------------------*/

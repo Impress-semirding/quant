@@ -1,0 +1,46 @@
+{
+  "name": "QuantBot",
+  "version": "0.0.1",
+  "description": "QuantBot",
+  "private": false,
+  "keywords": [],
+  "scripts": {
+    "start": "webpack server --config ./configs/webpack.config.dev.js --host 0.0.0.0",
+    "build": "webpack --config ./configs/webpack.config.prod.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@babel/core": "^7.17.12",
+    "@babel/plugin-transform-runtime": "^7.17.12",
+    "@babel/preset-react": "^7.17.12",
+    "antd": "^2.4.3",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^8.2.5",
+    "css-loader": "^5.2.6",
+    "D": "^1.0.0",
+    "hprose-js": "^2.0.29",
+    "lodash.keys": "^4.2.0",
+    "react-monaco-editor": "^0.7.0",
+    "react-redux": "^4.4.6",
+    "react-router": "^3.0.0",
+    "react-router-redux": "^4.0.7",
+    "recharts": "^0.15.1",
+    "redux": "^3.6.0",
+    "webpack": "^5.38.1",
+    "webpack-cli": "^4.7.0",
+    "webpack-dev-server": "^3.11.2"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.17.12",
+    "babel-plugin-import": "^1.0.1",
+    "copy-webpack-plugin": "^9.1.0",
+    "html-webpack-plugin": "^5.3.1",
+    "less": "^4.1.1",
+    "less-loader": "^6.2.0",
+    "loglevel": "^1.4.1",
+    "mini-css-extract-plugin": "^1.6.0",
+    "redux-thunk": "^2.4.1",
+    "url-loader": "^4.1.1",
+    "file-loader": "^6.2.0"
+  }
+}
