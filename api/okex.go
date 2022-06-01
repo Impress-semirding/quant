@@ -203,8 +203,8 @@ func (e *OKEX) Trade(options utils.OptionalParameter) interface{} {
 	tdMode, _ := options["tdMode"].(string)
 	side, _ := options["side"].(string)
 	ordType, _ := options["ordType"].(string)
-	sz, _ := options["sz"].(string)
-	price, _ := options["px"].(string)
+	sz, _ := conver.String(options["sz"])
+	price, _ := conver.String(options["px"])
 	posSide, _ := options["posSide"].(string)
 
 	if instId == "" {
