@@ -213,26 +213,26 @@ func (e *OKEX) Trade(options utils.OptionalParameter) interface{} {
 	}
 
 	if tdMode == "" {
-		e.Log("error, need provider instId")
+		e.Log("error, need provider tdMode")
 		return nil
 	}
 	if side == "" {
-		e.Log("error, need provider instId")
+		e.Log("error, need provider side")
 		return nil
 	}
 
 	if ordType == "" {
-		e.Log("error, need provider instId")
+		e.Log("error, need provider ordType")
 		return nil
 	}
 
 	if sz == "" {
-		e.Log("error, need provider instId")
+		e.Log("error, need provider sz")
 		return nil
 	}
 
 	if price == "" {
-		e.Log("error, need provider instId")
+		e.Log("error, need provider price")
 		return nil
 	}
 
@@ -265,7 +265,7 @@ func (e *OKEX) GetAccountPosition(options ...map[string]interface{}) interface{}
 	res, err := e.OKExV5.GetAccountPosition()
 
 	if err != nil {
-		e.Log("error, need provider instId")
+		e.Log("error, GetAccountPosition error")
 		return nil
 	}
 
