@@ -17,10 +17,9 @@ func (t Talib) Ema(prices []float64, period int) interface{} {
 	return result
 }
 
-type booling struct {
-	upper  []float64
-	middle []float64
-	lower  []float64
+func (t Talib) Ma(prices []float64, period int, inMAType talib.MaType) interface{} {
+	result := talib.Ma(prices, period, inMAType)
+	return result
 }
 
 func (t Talib) Bool(price []float64, period int) map[string][]float64 {

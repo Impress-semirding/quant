@@ -19,8 +19,8 @@ module.exports = () => ({
     historyApiFallback: true,
     proxy: {
       '/api': {
-        target: 'http://8.218.54.54:9876',
-        // target: 'http://127.0.0.1:9876',
+        // target: 'http://8.218.54.54:9876',
+        target: 'http://127.0.0.1:9876',
         changeOrigin: true,
       },
     },
