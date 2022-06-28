@@ -99,13 +99,13 @@ const { useState } = React;
 export default function Quote() {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  useEffect((() => {
-    return async () => {
-      const data = await list();
-      debugger;
-      console.log(data);
-    }
-  })(), [])
+  // useEffect((() => {
+  //   return async () => {
+  //     const data = await list();
+  //     debugger;
+  //     console.log(data);
+  //   }
+  // })(), [])
 
   const onFinish = (values: any) => {
     console.log('Success:', values);
