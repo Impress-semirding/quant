@@ -21,6 +21,7 @@ async function put(req: Iform) {
 
 async function list() {
   const res = await listApiConfig(10, 1);
+  return res;
 }
 
 export {

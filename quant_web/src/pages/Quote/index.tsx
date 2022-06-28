@@ -99,13 +99,17 @@ const { useState } = React;
 export default function Quote() {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  // useEffect((() => {
-  //   return async () => {
-  //     const data = await list();
-  //     debugger;
-  //     console.log(data);
-  //   }
-  // })(), [])
+  useEffect(() => {
+    async function load() {
+      const data = await list();
+      console.log(data);
+    }
+
+    setTimeout(() => {
+      load()
+    }, 3000)
+
+  }, [])
 
   const onFinish = (values: any) => {
     console.log('Success:', values);
