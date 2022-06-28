@@ -3,6 +3,7 @@ import { Button, Space, Checkbox, Form, Input, Table, Tag, Modal } from 'antd';
 import type { ColumnsType } from 'antd/lib/table';
 
 import TaskCreateForm from './task';
+import { put } from '../../actions/apiConfig';
 import styles from './index.module.scss';
 
 
@@ -108,9 +109,10 @@ export default function Quote() {
     setIsModalVisible(true);
   };
 
-  const handleOk = (values) => {
+  const handleOk = async (values) => {
     console.log(values)
     setIsModalVisible(false);
+    await put(values)
   };
 
   const handleCancel = () => {

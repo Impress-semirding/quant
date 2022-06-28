@@ -35,6 +35,7 @@ func Server() {
 		Algorithm algorithm
 		Trader    runner
 		Log       logger
+		ApiConfig apiConfig
 	}{}
 	service.Event = event{}
 	service.AddBeforeFilterHandler(func(request []byte, ctx rpc.Context, next rpc.NextFilterHandler) (response []byte, err error) {
