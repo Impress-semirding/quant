@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button, Space, Checkbox, Form, Input, Table, Tag, Modal } from 'antd';
 import type { ColumnsType } from 'antd/lib/table';
 
 import TaskCreateForm from './task';
-import { put } from '../../actions/apiConfig';
+import { list, put } from '../../actions/apiConfig';
 import styles from './index.module.scss';
 
 
@@ -13,6 +13,12 @@ interface DataType {
   age: number;
   address: string;
   tags: string[];
+}
+
+interface Iform {
+  funcName: string,
+  exchangeType: string,
+  period: string,
 }
 
 const columns: ColumnsType<DataType> = [
@@ -93,6 +99,14 @@ const { useState } = React;
 export default function Quote() {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
+  useEffect((() => {
+    return async () => {
+      const data = await list();
+      debugger;
+      console.log(data);
+    }
+  })(), [])
+
   const onFinish = (values: any) => {
     console.log('Success:', values);
   };
@@ -109,8 +123,7 @@ export default function Quote() {
     setIsModalVisible(true);
   };
 
-  const handleOk = async (values) => {
-    console.log(values)
+  const handleOk = async (values: Iform) => {
     setIsModalVisible(false);
     await put(values)
   };

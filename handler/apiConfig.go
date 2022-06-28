@@ -34,6 +34,7 @@ func (apiConfig) Put(req model.ApiConfig, ctx rpc.Context) (resp response) {
 			resp.Message = fmt.Sprint(err)
 			return
 		}
+		api.Period = req.Period
 		resp.Success = true
 		return
 	}
@@ -41,6 +42,34 @@ func (apiConfig) Put(req model.ApiConfig, ctx rpc.Context) (resp response) {
 	if err := model.DB.Create(&req).Error; err != nil {
 		resp.Message = fmt.Sprint(err)
 		return
+	}
+	resp.Success = true
+	return
+}
+
+// List ...
+func (apiConfig) List(size, page int64, order string, ctx rpc.Context) (resp response) {
+	username := ctx.GetString("username")
+	if username == "" {
+		resp.Message = constant.ErrAuthorizationError
+		return
+	}
+	self, err := model.GetUser(username)
+	if err != nil {
+		resp.Message = fmt.Sprint(err)
+		return
+	}
+	total, apiConfig, err := self.ListApiConfig(size, page, order)
+	if err != nil {
+		resp.Message = fmt.Sprint(err)
+		return
+	}
+	resp.Data = struct {
+		Total int64
+		List  []model.ApiConfig
+	}{
+		Total: total,
+		List:  apiConfig,
 	}
 	resp.Success = true
 	return

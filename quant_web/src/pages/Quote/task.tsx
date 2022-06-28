@@ -59,7 +59,7 @@ const TaskCreateForm: React.FC<CreateFormProps> = ({
         initialValues={{ modifier: 'public' }}
       >
         <Form.Item
-          name="exchange"
+          name="exchangeType"
           label="交易所"
           rules={[{ required: true, message: '请选择交易所' }]}
         >
@@ -70,14 +70,23 @@ const TaskCreateForm: React.FC<CreateFormProps> = ({
           </Select>
         </Form.Item>
         <Form.Item
-          name="taskType"
+          name="funcName"
           label="任务类型"
           rules={[{ required: true, message: '请选择任务类型' }]}
         >
           <Select placeholder="请选择任务类型">
-            <Option value="1">1h-kline</Option>
-            <Option value="2">4h-kline</Option>
-            <Option value="3">1d-kline</Option>
+            <Option value="GetKlineRecords">GetKlineRecords</Option>
+          </Select>
+        </Form.Item>
+        <Form.Item
+          name="period"
+          label="任务类型"
+          rules={[{ required: true, message: '请选择任务类型' }]}
+        >
+          <Select placeholder="请选择任务period">
+            <Option value="7">1h-kline</Option>
+            <Option value="10">4h-kline</Option>
+            <Option value="14">1d-kline</Option>
           </Select>
         </Form.Item>
       </Form>
