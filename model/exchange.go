@@ -39,3 +39,9 @@ func (user User) ListExchange(size, page int64, order string) (total int64, exch
 	err = DB.Where("user_id in (?)", userIDs).Order(toUnderScoreCase(order)).Limit(size).Offset((page - 1) * size).Find(&exchanges).Error
 	return
 }
+
+// GetUser ...
+func GetExchange(exchangeType string) (apiConfig ApiConfig, err error) {
+	err = DB.Where("type = ?", exchangeType).First(&apiConfig).Error
+	return
+}

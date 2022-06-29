@@ -14,6 +14,7 @@ type ApiConfig struct {
 	CreatedAt    time.Time  `json:"createdAt"`
 	UpdatedAt    time.Time  `json:"updatedAt"`
 	DeletedAt    *time.Time `sql:"index" json:"-"`
+	Exchanges    Exchange   `gorm:"-" json:"exchange"`
 }
 
 // GetUser ...
@@ -25,5 +26,10 @@ func GetTaskConfig(exchangeType, funcName string, period int) (apiConfig ApiConf
 // ListAlgorithm ...
 func ListApiConfig() (apiConfig []ApiConfig, err error) {
 	err = DB.Find(&apiConfig).Error
+	return
+}
+
+func GetTaskConfigById(id int) (apiConfig ApiConfig, err error) {
+	err = DB.Where("id = ?", id).First(&apiConfig).Error
 	return
 }
