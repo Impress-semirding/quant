@@ -1,18 +1,32 @@
 import rpcReques from '../utils/rpc';
 import { IResp } from './types';
 
-type IData = { data: any };
+interface IConfigTaskItem {
+  createdAt: Date,
+  exchangeType: string,
+  funcName: string,
+  id: number,
+  period: number,
+  status: string,
+  updatedAt: Date,
+  userId: number
+}
+
+type IData = {
+  list: IConfigTaskItem[],
+  total: number,
+};
 interface Iform {
   funcName: string,
   exchangeType: string,
   period: string,
 }
 
-type IPutgResp = IResp & IData;
+// type IPutgResp = IResp & IData;
 
-type IPutConfig = (req: any) => Promise<IPutgResp>
+type IPutConfig = (req: any) => Promise<IData>
 
-type IListConfig = (size: number, page: number) => Promise<IPutgResp>
+type IListConfig = (size: number, page: number) => Promise<IData>
 
 
 async function put(req: Iform) {
@@ -23,11 +37,15 @@ async function put(req: Iform) {
 
 async function list() {
   const listApiConfig = rpcReques<IListConfig>("ApiConfig", "List");
-  const res = await listApiConfig(10,1)
+  const res = await listApiConfig(10, 1)
   return res;
 }
 
 export {
   put,
   list
+}
+
+export type {
+  IConfigTaskItem
 }

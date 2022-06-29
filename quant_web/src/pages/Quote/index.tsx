@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
-import { Button, Space, Checkbox, Form, Input, Table, Tag, Modal } from 'antd';
+import { Button, Space, Checkbox, Form, Input, Table, Tag, Modal, message } from 'antd';
 import type { ColumnsType } from 'antd/lib/table';
 
 import TaskCreateForm from './task';
 import { list, put } from '../../actions/apiConfig';
+import { IConfigTaskItem } from '../../actions/apiConfig';
 import styles from './index.module.scss';
 
 
@@ -21,8 +22,6 @@ interface Iform {
   period: string,
 }
 
-type P = <T>() => Promise<any>
-
 const columns: ColumnsType<DataType> = [
   {
     title: 'id',
@@ -32,33 +31,30 @@ const columns: ColumnsType<DataType> = [
   },
   {
     title: '交易所',
-    dataIndex: 'exchange',
-    key: 'exchange',
+    dataIndex: 'exchangeType',
+    key: 'exchangeType',
   },
   {
     title: '任务类型',
-    dataIndex: 'taskType',
-    key: 'taskType',
+    dataIndex: 'funcName',
+    key: 'funcName',
+  },
+  {
+    title: '执行时间',
+    dataIndex: 'period',
+    key: 'period',
   },
   {
     title: '状态',
     key: 'status',
-    dataIndex: 'tags',
-    // render: (_, { tags }) => (
-    //   <>
-    //     {tags.map(tag => {
-    //       let color = tag.length > 5 ? 'geekblue' : 'green';
-    //       if (tag === 'loser') {
-    //         color = 'volcano';
-    //       }
-    //       return (
-    //         <Tag color={color} key={tag}>
-    //           {tag.toUpperCase()}
-    //         </Tag>
-    //       );
-    //     })}
-    //   </>
-    // ),
+    dataIndex: 'status',
+    render: (text) => {
+      if (text === 'N') {
+       return "未启动"
+      } else {
+       return "执行中"
+      }
+    }
   },
   {
     title: 'Action',
@@ -72,46 +68,20 @@ const columns: ColumnsType<DataType> = [
   },
 ];
 
-const data: DataType[] = [
-  {
-    key: '1',
-    name: 'John Brown',
-    age: 32,
-    address: 'New York No. 1 Lake Park',
-    tags: ['nice', 'developer'],
-  },
-  {
-    key: '2',
-    name: 'Jim Green',
-    age: 42,
-    address: 'London No. 1 Lake Park',
-    tags: ['loser'],
-  },
-  {
-    key: '3',
-    name: 'Joe Black',
-    age: 32,
-    address: 'Sidney No. 1 Lake Park',
-    tags: ['cool', 'teacher'],
-  },
-];
-
 const { useState } = React;
 
 export default function Quote() {
-  const [data, setSata] = useState([]);
+  const [data, setSata] = useState<IConfigTaskItem[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
-    async function load() {
-      const data = await list();
-      debugger
-      console.log(data);
-
-    }
-
-    load()
+    loadList()
   }, [])
+
+  const loadList = async () => {
+    const { list: data } = await list();
+    setSata(data);
+  }
 
   const onFinish = (values: any) => {
     console.log('Success:', values);
@@ -131,9 +101,9 @@ export default function Quote() {
 
   const handleOk = async (values) => {
     setIsModalVisible(false);
-    const res = await put(values)
-    debugger;
-    console.log(res)
+    await put(values)
+    await loadList();
+    message.success("添加交易所任务成功")
   };
 
   const handleCancel = () => {
