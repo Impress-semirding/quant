@@ -3,17 +3,18 @@ import { Button, Space, Checkbox, Form, Input, Table, Tag, Modal, message } from
 import type { ColumnsType } from 'antd/lib/table';
 
 import TaskCreateForm from './task';
-import { list, put } from '../../actions/apiConfig';
+import { list, put, run, stop } from '../../actions/apiConfig';
 import { IConfigTaskItem } from '../../actions/apiConfig';
+import { sleep } from '../../utils';
 import styles from './index.module.scss';
 
 
 interface DataType {
   key: string;
   name: string;
-  age: number;
+  title: string;
   address: string;
-  tags: string[];
+  render: () => Element;
 }
 
 interface Iform {
@@ -49,23 +50,14 @@ const columns: ColumnsType<DataType> = [
     key: 'status',
     dataIndex: 'status',
     render: (text) => {
-      if (text === 'N') {
-       return "未启动"
+      console.log(text)
+      if (text === 0) {
+        return "未启动"
       } else {
-       return "执行中"
+        return "执行中"
       }
     }
-  },
-  {
-    title: 'Action',
-    key: 'action',
-    render: (_, record) => (
-      <Space size="middle">
-        <a>启动 {record.name}</a>
-        <a>删除</a>
-      </Space>
-    ),
-  },
+  }
 ];
 
 const { useState } = React;
@@ -109,13 +101,41 @@ export default function Quote() {
   const handleCancel = () => {
     setIsModalVisible(false);
   };
+
+  const runTask = async (id: number) => {
+    await run(id)
+    message.success("执行策略成功")
+    await sleep(1000);
+    await loadList();
+  }
+
+  const stopTask = async (id: number) => {
+    await stop(id)
+    message.success("停止策略成功")
+    await sleep(1000);
+    await loadList();
+  }
+
+  const toolPaner = {
+    title: 'Action',
+    key: 'action',
+    render: (text: string, record: IConfigTaskItem) => (
+      <Space size="middle">
+        <Button disabled={record.status === 1} onClick={() => runTask(record.id)}>启动</Button>
+        <Button disabled={record.status === 1}>删除</Button>
+        <Button disabled={record.status === 0} onClick={() => stopTask(record.id)}>停止</Button>
+      </Space >
+    ),
+  }
+
+
   return (
     <div>
       <div className={styles.tool}>
         <Button type="primary" onClick={onAddTask}>添加任务</Button>
       </div>
       <TaskCreateForm visible={isModalVisible} onCreate={handleOk} onCancel={handleCancel} />
-      <Table columns={columns} dataSource={data} />
+      <Table columns={[...columns, toolPaner]} dataSource={data} />
     </div>
   )
 }

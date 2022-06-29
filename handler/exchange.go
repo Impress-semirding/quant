@@ -64,7 +64,7 @@ func (exchange) Put(req model.Exchange, ctx rpc.Context) (resp response) {
 			return
 		}
 		exchange.Name = req.Name
-		exchange.Type = req.Type
+		exchange.ExchangeType = req.ExchangeType
 		exchange.AccessKey = req.AccessKey
 		exchange.SecretKey = req.SecretKey
 		exchange.Passphrase = req.Passphrase

@@ -6,17 +6,17 @@ import (
 
 // Exchange struct
 type Exchange struct {
-	ID         int64      `gorm:"primary_key" json:"id"`
-	UserID     int64      `gorm:"index" json:"userId"`
-	Name       string     `gorm:"type:varchar(50)" json:"name"`
-	Type       string     `gorm:"type:varchar(50)" json:"type"`
-	AccessKey  string     `gorm:"type:varchar(200)" json:"accessKey"`
-	SecretKey  string     `gorm:"type:varchar(200)" json:"secretKey"`
-	Passphrase string     `gorm:"type:varchar(200)" json:"passphrase"`
-	CreatedAt  time.Time  `json:"createdAt"`
-	UpdatedAt  time.Time  `json:"updatedAt"`
-	DeletedAt  *time.Time `sql:"index" json:"-"`
-	Test       string
+	ID           int64      `gorm:"primary_key" json:"id"`
+	UserID       int64      `gorm:"index" json:"userId"`
+	Name         string     `gorm:"type:varchar(50)" json:"name"`
+	ExchangeType string     `gorm:"type:varchar(50)" json:"type"`
+	AccessKey    string     `gorm:"type:varchar(200)" json:"accessKey"`
+	SecretKey    string     `gorm:"type:varchar(200)" json:"secretKey"`
+	Passphrase   string     `gorm:"type:varchar(200)" json:"passphrase"`
+	CreatedAt    time.Time  `json:"createdAt"`
+	UpdatedAt    time.Time  `json:"updatedAt"`
+	DeletedAt    *time.Time `sql:"index" json:"-"`
+	Test         string
 }
 
 // ListExchange ...
@@ -41,7 +41,7 @@ func (user User) ListExchange(size, page int64, order string) (total int64, exch
 }
 
 // GetUser ...
-func GetExchange(exchangeType string) (apiConfig ApiConfig, err error) {
-	err = DB.Where("type = ?", exchangeType).First(&apiConfig).Error
+func GetExchange(exchangeType string) (exchange Exchange, err error) {
+	err = DB.Where("exchange_type = ?", exchangeType).First(&exchange).Error
 	return
 }

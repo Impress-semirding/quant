@@ -9,7 +9,7 @@ type ApiConfig struct {
 	UserID       int64      `gorm:"index" json:"userId"`
 	FuncName     string     `gorm:"type:varchar(50)" json:"funcName"`
 	ExchangeType string     `gorm:"type:varchar(50)" json:"exchangeType"`
-	Status       string     `gorm:"type:varchar(50);default:N" json:"status"`
+	Status       int64      `gorm:"type:int;default:N" json:"status"`
 	Period       int        `gorm:"type:int" json:"period"`
 	CreatedAt    time.Time  `json:"createdAt"`
 	UpdatedAt    time.Time  `json:"updatedAt"`

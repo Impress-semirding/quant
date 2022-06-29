@@ -81,10 +81,10 @@ func initialize(id int64) (trader Global, err error) {
 	}
 
 	for _, e := range es {
-		if maker, ok := okexMaker[e.Type]; ok {
+		if maker, ok := okexMaker[e.ExchangeType]; ok {
 			opt := api.Option{
 				TraderID:   trader.ID,
-				Type:       e.Type,
+				Type:       e.ExchangeType,
 				Name:       e.Name,
 				AccessKey:  e.AccessKey,
 				SecretKey:  e.SecretKey,

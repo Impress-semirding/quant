@@ -1,4 +1,4 @@
-import rpcReques from '../utils/rpc';
+import rpcRequest from '../utils/rpc';
 import { IResp } from './types';
 
 interface IConfigTaskItem {
@@ -7,7 +7,7 @@ interface IConfigTaskItem {
   funcName: string,
   id: number,
   period: number,
-  status: string,
+  status: number,
   updatedAt: Date,
   userId: number
 }
@@ -16,6 +16,7 @@ type IData = {
   list: IConfigTaskItem[],
   total: number,
 };
+
 interface Iform {
   funcName: string,
   exchangeType: string,
@@ -28,22 +29,38 @@ type IPutConfig = (req: any) => Promise<IData>
 
 type IListConfig = (size: number, page: number) => Promise<IData>
 
+type IRunTask = (id: number) => Promise<IData>
+
 
 async function put(req: Iform) {
-  const putApiConfig = rpcReques<IPutConfig>("ApiConfig", "PUT");
+  const putApiConfig = rpcRequest<IPutConfig>("ApiConfig", "Put");
   const res = await putApiConfig(req)
   return res;
 }
 
 async function list() {
-  const listApiConfig = rpcReques<IListConfig>("ApiConfig", "List");
+  const listApiConfig = rpcRequest<IListConfig>("ApiConfig", "List");
   const res = await listApiConfig(10, 1)
+  return res;
+}
+
+async function run(id: number) {
+  const runTask = rpcRequest<IRunTask>("ApiConfig", "Run")
+  const res = await runTask(id)
+  return res;
+}
+
+async function stop(id: number) {
+  const stopTask = rpcRequest<IRunTask>("ApiConfig", "Stop")
+  const res = await stopTask(id)
   return res;
 }
 
 export {
   put,
-  list
+  list,
+  run,
+  stop
 }
 
 export type {
