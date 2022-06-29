@@ -17,28 +17,21 @@ func (apiConfig) Put(req model.ApiConfig, ctx rpc.Context) (resp response) {
 		resp.Message = constant.ErrAuthorizationError
 		return
 	}
-	self, err := model.GetUser(username)
-	if err != nil {
-		resp.Message = fmt.Sprint(err)
+	if req.ExchangeType == "" || req.FuncName == "" || req.Period == 0 {
+		resp.Message = fmt.Sprintln("exchangeType和funcName,Period参数不能为空")
 		return
 	}
-	api := req
-	if req.ID > 0 {
-		if err := model.DB.First(&api, req.ID).Error; err != nil {
-			resp.Message = fmt.Sprint(err)
-			return
-		}
-		api.FuncName = req.FuncName
-		api.ExchangeType = req.ExchangeType
-		if err := model.DB.Save(&api).Error; err != nil {
-			resp.Message = fmt.Sprint(err)
-			return
-		}
-		api.Period = req.Period
-		resp.Success = true
+	apiConfig, _ := model.GetTaskConfig(req.ExchangeType, req.FuncName, req.Period)
+	// if err != nil {
+	// 	resp.Message = fmt.Sprint(err)
+	// 	return
+	// }
+
+	if apiConfig.ID != 0 {
+		resp.Message = fmt.Sprintln("任务已存在")
 		return
 	}
-	req.UserID = self.ID
+
 	if err := model.DB.Create(&req).Error; err != nil {
 		resp.Message = fmt.Sprint(err)
 		return
@@ -54,21 +47,17 @@ func (apiConfig) List(size, page int64, order string, ctx rpc.Context) (resp res
 		resp.Message = constant.ErrAuthorizationError
 		return
 	}
-	self, err := model.GetUser(username)
+	_, err := model.GetUser(username)
 	if err != nil {
 		resp.Message = fmt.Sprint(err)
 		return
 	}
-	total, apiConfig, err := self.ListApiConfig(size, page, order)
-	if err != nil {
-		resp.Message = fmt.Sprint(err)
-		return
-	}
+	apiConfig, _ := model.ListApiConfig()
 	resp.Data = struct {
 		Total int64
 		List  []model.ApiConfig
 	}{
-		Total: total,
+		Total: int64(len(apiConfig)),
 		List:  apiConfig,
 	}
 	resp.Success = true

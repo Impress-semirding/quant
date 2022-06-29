@@ -1,4 +1,5 @@
-import rpcReques, { IResBase } from '../utils/rpc';
+import rpcReques from '../utils/rpc';
+import { IResp } from './types';
 
 type IData = { data: any };
 interface Iform {
@@ -7,20 +8,22 @@ interface Iform {
   period: string,
 }
 
-type IPutgResp = IResBase & IData;
+type IPutgResp = IResp & IData;
 
 type IPutConfig = (req: any) => Promise<IPutgResp>
+
 type IListConfig = (size: number, page: number) => Promise<IPutgResp>
 
-const putApiConfig = rpcReques<IPutConfig>("ApiConfig", "PUT");
-const listApiConfig = rpcReques<IListConfig>("ApiConfig", "List");
 
 async function put(req: Iform) {
+  const putApiConfig = rpcReques<IPutConfig>("ApiConfig", "PUT");
   const res = await putApiConfig(req)
+  return res;
 }
 
 async function list() {
-  const res = await listApiConfig(10, 1);
+  const listApiConfig = rpcReques<IListConfig>("ApiConfig", "List");
+  const res = await listApiConfig(10,1)
   return res;
 }
 

@@ -1,36 +1,35 @@
 //  @ts-ignore
 import { Client } from 'hprose-js';
-import { promisify } from "es6-promisify";
 
-interface IResBase {
-  success: boolean,
-  message: string,
-}
+type RPCRequest = <T extends (...args: any[]) => Promise<any>>(funcName: string, type: string) => (...args: Parameters<T>) => Promise<ReturnType<T>>;
 
-export type {
-  IResBase
-}
-
-type RPCRequest = <T>(funcName: string, type: string) => T;
-
-// @ts-ignore
+//  @ts-ignore
 const rpcReques: RPCRequest = (funcName: string, type: string) => {
   const token = localStorage.getItem('token');
   const cluster = localStorage.getItem('cluster') || "http://localhost:3000";
   const client = Client.create(`${cluster}/api`, { [funcName]: [type] });
   client.setHeader('Authorization', `Bearer ${token}`);
-  return (...args) => {
-    return new Promise((resolve, reject) => {
-      client[funcName][type](...args, (resp) => {
-        if (resp.success) {
-          resolve(resp.data);
-        } else {
-          reject(resp.message)
-        }
-      })
-    })
+  return async (...args) => {
+    debugger;
+    const fn = client[funcName][type];
+    const resp = await fn.apply(client, args);
+    return resp;
   }
-  // return promisify(client[funcName][type])
+  // return async (...args) => {
+  //   new Promise((resolve, reject) => {
+  //     debugger;
+  //     client[funcName][type](...args, (resp: any) => {
+  //       if (resp.success) {
+  //         resolve(resp.data);
+  //       } else {
+  //         reject(resp.message)
+  //       }
+  //     })
+  //   })
+  //   .catch((e) => {
+  //     console.log("调用出错")
+  //   })
+  // }
 }
 
 export default rpcReques;

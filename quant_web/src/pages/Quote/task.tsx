@@ -3,14 +3,14 @@ import React, { useState } from 'react';
 // import { uuid as uuidv4 } from 'uuid';
 
 interface Values {
-  title: string;
-  description: string;
-  modifier: string;
+  funcName: string,
+  exchangeType: string,
+  period: string,
 }
 
 interface CreateFormProps {
   visible: boolean;
-  onCreate: (values: Values) => void;
+  onCreate: (values: Values) => Promise<any>;
   onCancel: () => void;
 }
 

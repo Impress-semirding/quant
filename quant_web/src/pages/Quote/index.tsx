@@ -21,6 +21,8 @@ interface Iform {
   period: string,
 }
 
+type P = <T>() => Promise<any>
+
 const columns: ColumnsType<DataType> = [
   {
     title: 'id',
@@ -97,18 +99,18 @@ const data: DataType[] = [
 const { useState } = React;
 
 export default function Quote() {
+  const [data, setSata] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
     async function load() {
       const data = await list();
+      debugger
       console.log(data);
+
     }
 
-    setTimeout(() => {
-      load()
-    }, 3000)
-
+    load()
   }, [])
 
   const onFinish = (values: any) => {
@@ -127,9 +129,11 @@ export default function Quote() {
     setIsModalVisible(true);
   };
 
-  const handleOk = async (values: Iform) => {
+  const handleOk = async (values) => {
     setIsModalVisible(false);
-    await put(values)
+    const res = await put(values)
+    debugger;
+    console.log(res)
   };
 
   const handleCancel = () => {
