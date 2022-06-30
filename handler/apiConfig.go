@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/Impress-semirding/quant/api"
@@ -12,27 +11,6 @@ import (
 )
 
 type apiConfig struct{}
-
-// func a() {
-// 	ctx, cancel := context.WithCancel(context.Background())
-// }
-
-type TaskContext struct {
-	ctx    context.Context
-	cancel context.CancelFunc
-}
-
-var (
-	goCtx map[int64]TaskContext
-)
-
-func InitTaskContext() {
-	goCtx = map[int64]TaskContext{}
-}
-
-func createTaskContext() (c context.Context, ca context.CancelFunc) {
-	return context.WithCancel(context.Background())
-}
 
 //	 put
 func (apiConfig) Put(req model.ApiConfig, ctx rpc.Context) (resp response) {
@@ -119,7 +97,7 @@ func (apiConfig) Run(id int, ctx rpc.Context) (resp response) {
 
 	topic := taskConfig.ExchangeType + "-" + taskConfig.FuncName + "-" + fmt.Sprint(taskConfig.Period)
 	fmt.Println("topic", topic)
-	task := task.NewTask(taskConfig.ID, topic)
+	taskInstance := task.NewTask(taskConfig.ID, topic)
 	// ch := task.Sub()
 
 	option := api.Option{
@@ -128,21 +106,21 @@ func (apiConfig) Run(id int, ctx rpc.Context) (resp response) {
 		Passphrase: exchange.Passphrase,
 	}
 
-	//	test case
-	c1, cancel := createTaskContext()
-	goCtx[taskConfig.ID] = TaskContext{
-		ctx:    c1,
-		cancel: cancel,
-	}
+	//	test cas
+	t, _ := task.CreateTaskContext(taskConfig.ID)
 
-	go task.Run(goCtx, option)
+	go taskInstance.Run(t, option)
 
 	resp.Success = true
 	return
 }
 
-func (apiConfig) Stop(id int, ctx rpc.Context) (resp response) {
-	return
+func (apiConfig) Stop(id int64, ctx rpc.Context) (resp response) {
+	_, cancel := task.GetContext(id)
+	cancel()
+
+	resp.Success = true
+	return resp
 }
 
 func dealSign(ch chan task.DataEvent) {

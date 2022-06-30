@@ -2,9 +2,10 @@ package main
 
 import (
 	"github.com/Impress-semirding/quant/handler"
+	"github.com/Impress-semirding/quant/task"
 )
 
 func main() {
-	handler.InitTaskContext()
+	task.InitTaskContext()
 	handler.Server()
 }
