@@ -114,13 +114,10 @@ func (apiConfig) Run(id int, ctx rpc.Context) (resp response) {
 		Topic:  topic,
 	})
 
-	t, _ := taskLib.CreateTaskContext(taskConfig.ID)
-
 	fmt.Println("topic", topic)
 
-	ch := task.Sub()
-	go dealSign(ch)
-	go task.Run(t, taskConfig.InstId, taskConfig.Period)
+	task.Sub(testChan)
+	go task.Run(taskConfig.InstId, taskConfig.Period)
 
 	resp.Success = true
 	return
@@ -133,7 +130,7 @@ func (apiConfig) Stop(id int64, ctx rpc.Context) (resp response) {
 	return resp
 }
 
-func dealSign(ch chan taskLib.DataEvent) {
+func testChan(ch chan taskLib.DataEvent) {
 	for {
 		select {
 		case d := <-ch:

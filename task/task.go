@@ -13,32 +13,27 @@ type Task struct {
 	Topic  string
 	status int64
 	api.Option
-}
-
-type TaskContext struct {
-	ctx    context.Context
-	cancel context.CancelFunc
+	Ctx    context.Context
+	Cancel context.CancelFunc
 }
 
 var (
-	goCtx map[int64]TaskContext
+	ExecutorTask = make(map[int64]*Task)
 )
 
-func InitTaskContext() {
-	goCtx = map[int64]TaskContext{}
-}
-
-var ExecutorTask = make(map[int64]*Task)
-
 func NewTask(p Task) (t *Task) {
+	ctx, cancel := createTaskContext(p.TaskId)
 	return &Task{
 		TaskId: p.TaskId,
 		Topic:  p.Topic,
 		Option: p.Option,
+		Ctx:    ctx,
+		Cancel: cancel,
 	}
 }
 
-func (t *Task) Run(ctx context.Context, instId string, period int) {
+func (t *Task) Run(instId string, period int) {
+	ctx := t.Ctx
 	if t := ExecutorTask[t.TaskId]; t != nil && t.status > 0 {
 		fmt.Println("任务正在执行中...请勿连续执行")
 		return
@@ -67,9 +62,13 @@ func (t *Task) Run(ctx context.Context, instId string, period int) {
 	}
 }
 
-func (t *Task) Sub() (c chan DataEvent) {
+type CallbackFunc = func(ch chan DataEvent)
+
+func (t *Task) Sub(callback CallbackFunc) (c chan DataEvent) {
 	ch := make(chan DataEvent)
 	eb.Subscribe(t.Topic, ch)
+	go callback(ch)
+
 	return ch
 }
 
@@ -94,12 +93,8 @@ func GetTaskStatus(id int64) (status int64) {
 	return
 }
 
-func CreateTaskContext(id int64) (c context.Context, ca context.CancelFunc) {
+func createTaskContext(id int64) (c context.Context, ca context.CancelFunc) {
 	ctx, cancel := context.WithCancel(context.Background())
-	goCtx[id] = TaskContext{
-		ctx:    ctx,
-		cancel: cancel,
-	}
 	return ctx, cancel
 }
 
@@ -107,6 +102,6 @@ func GetContext(id int64) (c context.Context, cancel context.CancelFunc) {
 	if id == 0 {
 		return nil, nil
 	}
-	taskContext := goCtx[id]
-	return taskContext.ctx, taskContext.cancel
+	task := ExecutorTask[id]
+	return task.Ctx, task.Cancel
 }
