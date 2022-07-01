@@ -9,9 +9,10 @@ import (
 )
 
 type Task struct {
-	taskId int64
-	topic  string
+	TaskId int64
+	Topic  string
 	status int64
+	api.Option
 }
 
 type TaskContext struct {
@@ -29,27 +30,27 @@ func InitTaskContext() {
 
 var ExecutorTask = make(map[int64]*Task)
 
-func NewTask(id int64, topic string) (t *Task) {
-	task := &Task{
-		taskId: id,
-		topic:  topic,
+func NewTask(p Task) (t *Task) {
+	return &Task{
+		TaskId: p.TaskId,
+		Topic:  p.Topic,
+		Option: p.Option,
 	}
-	return task
 }
 
-func (t *Task) Run(ctx context.Context, option api.Option) {
-	if t := ExecutorTask[t.taskId]; t != nil && t.status > 0 {
+func (t *Task) Run(ctx context.Context, instId string, period int) {
+	if t := ExecutorTask[t.TaskId]; t != nil && t.status > 0 {
 		fmt.Println("任务正在执行中...请勿连续执行")
 		return
 	}
 
 	defer func() {
 		t.status = 0
-		ExecutorTask[t.taskId] = t
+		ExecutorTask[t.TaskId] = t
 	}()
 
 	t.status = 1
-	ExecutorTask[t.taskId] = t
+	ExecutorTask[t.TaskId] = t
 
 	for {
 		select {
@@ -57,7 +58,7 @@ func (t *Task) Run(ctx context.Context, option api.Option) {
 			fmt.Printf("ctx.Done")
 			return
 		default:
-			client := api.NewOKEX(option)
+			client := api.NewOKEX(t.Option)
 			data := client.GetKlineRecords("BTC-USDT", 10)
 			t.Pub(data)
 			time.Sleep(100 * time.Millisecond)
@@ -66,8 +67,24 @@ func (t *Task) Run(ctx context.Context, option api.Option) {
 	}
 }
 
-func Stop() {
+func (t *Task) Sub() (c chan DataEvent) {
+	ch := make(chan DataEvent)
+	eb.Subscribe(t.Topic, ch)
+	return ch
+}
 
+func (t *Task) Pub(data interface{}) {
+	go eb.Publish(t.Topic, data)
+}
+
+func Stop(id int64) bool {
+	defer func() bool {
+		return false
+	}()
+	_, cancel := GetContext(id)
+	cancel()
+
+	return true
 }
 
 func GetTaskStatus(id int64) (status int64) {
@@ -75,16 +92,6 @@ func GetTaskStatus(id int64) (status int64) {
 		status = t.status
 	}
 	return
-}
-
-func (t *Task) Sub() (c chan DataEvent) {
-	ch := make(chan DataEvent)
-	eb.Subscribe(t.topic, ch)
-	return ch
-}
-
-func (t *Task) Pub(data interface{}) {
-	go eb.Publish(t.topic, data)
 }
 
 func CreateTaskContext(id int64) (c context.Context, ca context.CancelFunc) {

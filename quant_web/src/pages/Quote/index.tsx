@@ -51,7 +51,7 @@ const columns: ColumnsType<DataType> = [
     dataIndex: 'status',
     render: (text) => {
       console.log(text)
-      if (text === 0) {
+      if (text === "N") {
         return "未启动"
       } else {
         return "执行中"

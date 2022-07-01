@@ -9,7 +9,8 @@ type ApiConfig struct {
 	UserID       int64      `gorm:"index" json:"userId"`
 	FuncName     string     `gorm:"type:varchar(50)" json:"funcName"`
 	ExchangeType string     `gorm:"type:varchar(50)" json:"exchangeType"`
-	Status       int64      `gorm:"type:int;default:N" json:"status"`
+	Status       string     `gorm:"type:varchar(50);default:N" json:"status"`
+	InstId       string     `gorm:"type:varchar(50);default:N" json:"instId"`
 	Period       int        `gorm:"type:int" json:"period"`
 	CreatedAt    time.Time  `json:"createdAt"`
 	UpdatedAt    time.Time  `json:"updatedAt"`
@@ -18,8 +19,8 @@ type ApiConfig struct {
 }
 
 // GetUser ...
-func GetTaskConfig(exchangeType, funcName string, period int) (apiConfig ApiConfig, err error) {
-	err = DB.Where("exchange_type = ? AND func_name = ? AND period = ?", exchangeType, funcName, period).First(&apiConfig).Error
+func GetTaskConfig(exchangeType, funcName string, instId string, period int) (apiConfig ApiConfig, err error) {
+	err = DB.Where("exchange_type = ? AND func_name = ? AND inst_id = ? AND period = ?", exchangeType, funcName, instId, period).First(&apiConfig).Error
 	return
 }
 

@@ -71,13 +71,25 @@ const TaskCreateForm: React.FC<CreateFormProps> = ({
         </Form.Item>
         <Form.Item
           name="funcName"
-          label="任务类型"
-          rules={[{ required: true, message: '请选择任务类型' }]}
+          label="API"
+          rules={[{ required: true, message: '请选择调用API' }]}
         >
-          <Select placeholder="请选择任务类型">
+          <Select placeholder="请选择调用API">
             <Option value="GetKlineRecords">GetKlineRecords</Option>
           </Select>
         </Form.Item>
+
+        <Form.Item
+          name="instId"
+          label="交易商品"
+          rules={[{ required: true, message: '请选择交易商品' }]}
+        >
+          <Select placeholder="请选择交易商品">
+            <Option value="BTC-USDT">BTC-USDT</Option>
+            <Option value="ETH-USDT">ETH-USDT</Option>
+          </Select>
+        </Form.Item>
+
         <Form.Item
           name="period"
           label="任务类型"

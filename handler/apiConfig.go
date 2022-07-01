@@ -6,7 +6,7 @@ import (
 	"github.com/Impress-semirding/quant/api"
 	"github.com/Impress-semirding/quant/constant"
 	"github.com/Impress-semirding/quant/model"
-	"github.com/Impress-semirding/quant/task"
+	taskLib "github.com/Impress-semirding/quant/task"
 	"github.com/hprose/hprose-golang/rpc"
 )
 
@@ -23,7 +23,7 @@ func (apiConfig) Put(req model.ApiConfig, ctx rpc.Context) (resp response) {
 		resp.Message = fmt.Sprintln("exchangeType和funcName,Period参数不能为空")
 		return
 	}
-	apiConfig, _ := model.GetTaskConfig(req.ExchangeType, req.FuncName, req.Period)
+	apiConfig, _ := model.GetTaskConfig(req.ExchangeType, req.FuncName, req.InstId, req.Period)
 	// if err != nil {
 	// 	resp.Message = fmt.Sprint(err)
 	// 	return
@@ -58,7 +58,12 @@ func (apiConfig) List(size, page int64, order string, ctx rpc.Context) (resp res
 
 	var tasks []model.ApiConfig
 	for _, item := range apiConfig {
-		item.Status = task.GetTaskStatus(item.ID)
+		id := taskLib.GetTaskStatus(item.ID)
+		if id > 0 {
+			item.Status = "Y"
+		} else {
+			item.Status = "N"
+		}
 		tasks = append(tasks, item)
 	}
 	resp.Data = struct {
@@ -95,35 +100,40 @@ func (apiConfig) Run(id int, ctx rpc.Context) (resp response) {
 		return
 	}
 
-	topic := taskConfig.ExchangeType + "-" + taskConfig.FuncName + "-" + fmt.Sprint(taskConfig.Period)
-	fmt.Println("topic", topic)
-	taskInstance := task.NewTask(taskConfig.ID, topic)
-	// ch := task.Sub()
-
 	option := api.Option{
 		AccessKey:  exchange.AccessKey,
 		SecretKey:  exchange.SecretKey,
 		Passphrase: exchange.Passphrase,
 	}
 
-	//	test cas
-	t, _ := task.CreateTaskContext(taskConfig.ID)
+	topic := taskConfig.ExchangeType + "-" + taskConfig.FuncName + "-" + taskConfig.InstId + "-" + fmt.Sprint(taskConfig.Period)
+	fmt.Println("topic", topic)
+	task := taskLib.NewTask(taskLib.Task{
+		TaskId: taskConfig.ID,
+		Option: option,
+		Topic:  topic,
+	})
 
-	go taskInstance.Run(t, option)
+	t, _ := taskLib.CreateTaskContext(taskConfig.ID)
+
+	fmt.Println("topic", topic)
+
+	ch := task.Sub()
+	go dealSign(ch)
+	go task.Run(t, taskConfig.InstId, taskConfig.Period)
 
 	resp.Success = true
 	return
 }
 
 func (apiConfig) Stop(id int64, ctx rpc.Context) (resp response) {
-	_, cancel := task.GetContext(id)
-	cancel()
+	taskLib.Stop(id)
 
 	resp.Success = true
 	return resp
 }
 
-func dealSign(ch chan task.DataEvent) {
+func dealSign(ch chan taskLib.DataEvent) {
 	for {
 		select {
 		case d := <-ch:
