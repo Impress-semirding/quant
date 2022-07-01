@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/Impress-semirding/quant/api"
 	"github.com/Impress-semirding/quant/constant"
@@ -117,7 +118,7 @@ func (apiConfig) Run(id int, ctx rpc.Context) (resp response) {
 	fmt.Println("topic", topic)
 
 	task.Sub(testChan)
-	go task.Run(taskConfig.InstId, taskConfig.Period)
+	task.Run(testRunTask(taskConfig.InstId, taskConfig.Period))
 
 	resp.Success = true
 	return
@@ -136,5 +137,25 @@ func testChan(ch chan taskLib.DataEvent) {
 		case d := <-ch:
 			fmt.Println("ch:", d)
 		}
+	}
+}
+
+func testRunTask(instId string, period int) taskLib.RunTaskFucType {
+	return func(task *taskLib.Task) {
+		ctx := task.Ctx
+		for {
+			select {
+			case <-ctx.Done():
+				fmt.Printf("ctx.Done")
+				return
+			default:
+				client := api.NewOKEX(task.Option)
+				data := client.GetKlineRecords(instId, period)
+				task.Pub(data)
+				time.Sleep(100 * time.Millisecond)
+				fmt.Println("轮训执行任务")
+			}
+		}
+
 	}
 }

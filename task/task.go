@@ -3,7 +3,6 @@ package task
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/Impress-semirding/quant/api"
 )
@@ -16,6 +15,10 @@ type Task struct {
 	Ctx    context.Context
 	Cancel context.CancelFunc
 }
+
+type SubscribeFuncType = func(ch chan DataEvent)
+
+type RunTaskFucType = func(t *Task)
 
 var (
 	ExecutorTask = make(map[int64]*Task)
@@ -32,39 +35,19 @@ func NewTask(p Task) (t *Task) {
 	}
 }
 
-func (t *Task) Run(instId string, period int) {
-	ctx := t.Ctx
+func (t *Task) Run(taskfunc RunTaskFucType) {
 	if t := ExecutorTask[t.TaskId]; t != nil && t.status > 0 {
 		fmt.Println("任务正在执行中...请勿连续执行")
 		return
 	}
 
-	defer func() {
-		t.status = 0
-		ExecutorTask[t.TaskId] = t
-	}()
-
 	t.status = 1
 	ExecutorTask[t.TaskId] = t
 
-	for {
-		select {
-		case <-ctx.Done():
-			fmt.Printf("ctx.Done")
-			return
-		default:
-			client := api.NewOKEX(t.Option)
-			data := client.GetKlineRecords("BTC-USDT", 10)
-			t.Pub(data)
-			time.Sleep(100 * time.Millisecond)
-			fmt.Println("轮训执行任务")
-		}
-	}
+	go taskfunc(t)
 }
 
-type CallbackFunc = func(ch chan DataEvent)
-
-func (t *Task) Sub(callback CallbackFunc) (c chan DataEvent) {
+func (t *Task) Sub(callback SubscribeFuncType) (c chan DataEvent) {
 	ch := make(chan DataEvent)
 	eb.Subscribe(t.Topic, ch)
 	go callback(ch)
@@ -77,9 +60,15 @@ func (t *Task) Pub(data interface{}) {
 }
 
 func Stop(id int64) bool {
-	defer func() bool {
-		return false
+	defer func() {
+		t := GetTask(id)
+		if t == nil {
+			return
+		}
+		t.status = 0
+		delete(ExecutorTask, t.TaskId)
 	}()
+
 	_, cancel := GetContext(id)
 	cancel()
 
@@ -96,6 +85,14 @@ func GetTaskStatus(id int64) (status int64) {
 func createTaskContext(id int64) (c context.Context, ca context.CancelFunc) {
 	ctx, cancel := context.WithCancel(context.Background())
 	return ctx, cancel
+}
+
+func GetTask(id int64) (t *Task) {
+	if id == 0 {
+		return nil
+	}
+	task := ExecutorTask[id]
+	return task
 }
 
 func GetContext(id int64) (c context.Context, cancel context.CancelFunc) {

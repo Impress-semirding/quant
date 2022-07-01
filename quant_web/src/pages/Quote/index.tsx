@@ -50,7 +50,6 @@ const columns: ColumnsType<DataType> = [
     key: 'status',
     dataIndex: 'status',
     render: (text) => {
-      console.log(text)
       if (text === "N") {
         return "未启动"
       } else {
@@ -121,9 +120,9 @@ export default function Quote() {
     key: 'action',
     render: (text: string, record: IConfigTaskItem) => (
       <Space size="middle">
-        <Button disabled={record.status === 1} onClick={() => runTask(record.id)}>启动</Button>
-        <Button disabled={record.status === 1}>删除</Button>
-        <Button disabled={record.status === 0} onClick={() => stopTask(record.id)}>停止</Button>
+        <Button disabled={record.status === "Y"} onClick={() => runTask(record.id)}>启动</Button>
+        <Button disabled={record.status === "Y"}>删除</Button>
+        <Button disabled={record.status === "N"} onClick={() => stopTask(record.id)}>停止</Button>
       </Space >
     ),
   }
