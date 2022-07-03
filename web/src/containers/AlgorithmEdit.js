@@ -128,7 +128,7 @@ class AlgorithmEdit extends Component {
             >Cancel</Button>
           </Col>
         </Row>
-        <Row style={{marginTop: 18}}>
+        <Row style={{ marginTop: 18 }}>
           <Tooltip placement="bottomLeft" title="Algorithm Description">
             <Input
               rows={1}

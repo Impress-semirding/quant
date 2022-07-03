@@ -2,17 +2,19 @@ import type { RouteObject } from "react-router-dom";
 
 // import CustomerLayout from './pages/Component/Layout'
 import Login from './pages/Login'
-import User from './pages/User'
+import Algorithm from './pages/Algorithm'
 import Quote from './pages/Quote'
+import AlgorithmEdit from './pages/Algorithm/AlgorithmEdit';
 
 const routes: RouteObject[] = [
   {
     path: "/",
     // element: <CustomerLayout />,
     children: [
-      { index: true, element: <Login /> },
-      { path: "user", element: <User /> },
-      { path: "/quote", element: <Quote /> },
+      { path: "login", element: <Login /> },
+      { path: "algorithm", element: <Algorithm /> },
+      { path: "algorithmEdit/:id", element: <AlgorithmEdit /> },
+      { path: "quote", element: <Quote /> },
     ],
   },
 ];

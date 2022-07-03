@@ -14,6 +14,7 @@
     "hprose-js": "^2.0.33",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
+    "react-monaco-editor": "^0.49.0",
     "react-router-dom": "^6.3.0",
     "recoil": "^0.7.4"
   },

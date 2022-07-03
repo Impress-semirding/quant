@@ -23,6 +23,12 @@ interface Iform {
   period: string,
 }
 
+interface Iperiod {
+  7: string,
+  10: string,
+  14: string,
+}
+
 const columns: ColumnsType<DataType> = [
   {
     title: 'id',
@@ -41,9 +47,22 @@ const columns: ColumnsType<DataType> = [
     key: 'funcName',
   },
   {
+    title: '交易品种',
+    dataIndex: 'instId',
+    key: 'instId',
+  },
+  {
     title: '执行时间',
     dataIndex: 'period',
     key: 'period',
+    render: (period: 7 | 10 | 14) => {
+      const m: Iperiod = {
+        7: "1H",
+        10: "4H",
+        14: "1D"
+      }
+      return m[period]
+    }
   },
   {
     title: '状态',

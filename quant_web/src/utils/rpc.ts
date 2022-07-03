@@ -4,11 +4,13 @@ import { message } from 'antd';
 
 type RPCRequest = <T extends (...args: any[]) => Promise<any>>(funcName: string, type: string) => (...args: Parameters<T>) => Promise<ReturnType<T>>;
 
-const rpcReques: RPCRequest = (funcName: string, type: string) => {
+const rpcReques: RPCRequest = (funcName: string, type: string, withToken?: boolean) => {
   const token = localStorage.getItem('token');
   const cluster = localStorage.getItem('cluster') || "http://localhost:3000";
   const client = Client.create(`${cluster}/api`, { [funcName]: [type] });
-  client.setHeader('Authorization', `Bearer ${token}`);
+  if (withToken) {
+    client.setHeader('Authorization', `Bearer ${token}`);
+  }
   return async (...args) => {
     const fn = client[funcName][type];
     const resp = await fn.apply(client, args);

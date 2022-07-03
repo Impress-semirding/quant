@@ -11,3 +11,10 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.monaco-editor {
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  text-align: left;
+}

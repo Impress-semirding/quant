@@ -6,15 +6,16 @@ import (
 
 // Algorithm struct
 type Algorithm struct {
-	ID          int64      `gorm:"primary_key" json:"id"`
-	UserID      int64      `gorm:"index" json:"userId"`
-	Name        string     `gorm:"type:varchar(200)" json:"name"`
-	Description string     `gorm:"type:text" json:"description"`
-	Script      string     `gorm:"type:text" json:"script"`
-	EvnDefault  string     `gorm:"type:text" json:"evnDefault"`
-	CreatedAt   time.Time  `json:"createdAt"`
-	UpdatedAt   time.Time  `json:"updatedAt"`
-	DeletedAt   *time.Time `sql:"index" json:"-"`
+	ID             int64      `gorm:"primary_key" json:"id"`
+	UserID         int64      `gorm:"index" json:"userId"`
+	Name           string     `gorm:"type:varchar(200)" json:"name"`
+	Description    string     `gorm:"type:text" json:"description"`
+	DefaultDataApi string     `gorm:"type:varchar(30)" json:"defaultDataApi"`
+	Script         string     `gorm:"type:text" json:"script"`
+	EvnDefault     string     `gorm:"type:text" json:"evnDefault"`
+	CreatedAt      time.Time  `json:"createdAt"`
+	UpdatedAt      time.Time  `json:"updatedAt"`
+	DeletedAt      *time.Time `sql:"index" json:"-"`
 
 	Traders []Trader `gorm:"-" json:"traders"`
 }

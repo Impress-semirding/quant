@@ -1,5 +1,6 @@
 package model
 
+//	即将废弃
 import (
 	"time"
 )

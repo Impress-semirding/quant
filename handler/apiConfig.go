@@ -95,24 +95,12 @@ func (apiConfig) Run(id int, ctx rpc.Context) (resp response) {
 		return
 	}
 
-	exchange, err := model.GetExchange("okex")
-	if err != nil {
-		resp.Message = fmt.Sprint(err)
-		return
-	}
-
-	option := api.Option{
-		AccessKey:  exchange.AccessKey,
-		SecretKey:  exchange.SecretKey,
-		Passphrase: exchange.Passphrase,
-	}
-
 	topic := taskConfig.ExchangeType + "-" + taskConfig.FuncName + "-" + taskConfig.InstId + "-" + fmt.Sprint(taskConfig.Period)
 	fmt.Println("topic", topic)
 	task := taskLib.NewTask(taskLib.Task{
 		TaskId: taskConfig.ID,
-		Option: option,
-		Topic:  topic,
+		//Option: option,
+		Topic: topic,
 	})
 
 	fmt.Println("topic", topic)

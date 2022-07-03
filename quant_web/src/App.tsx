@@ -3,14 +3,16 @@ import 'antd/dist/antd.css';
 
 import routes from './routes';
 import './App.css'
-import React, {useState} from "react";
-import {Layout, Menu} from "antd";
+import React, { useState } from "react";
+import { Layout, Menu } from "antd";
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   UploadOutlined,
   UserOutlined,
-  VideoCameraOutlined
+  RiseOutlined,
+  VideoCameraOutlined,
+  DeliveredProcedureOutlined,
 } from "@ant-design/icons";
 
 const { Header, Sider, Content } = Layout;
@@ -25,7 +27,7 @@ function App() {
 
   return (
     <div className="App">
-      <Layout>
+      <Layout style={{ height: "100vw" }}>
         <Sider trigger={null} collapsible collapsed={collapsed}>
           <div className="logo" />
           <Menu
@@ -34,14 +36,19 @@ function App() {
             defaultSelectedKeys={['1']}
             items={[
               {
-                key: 'Home',
-                icon: <UserOutlined />,
-                label: <Link to="/user">Home</Link>
+                key: 'Algorithm',
+                icon: <RiseOutlined />,
+                label: <Link to="/algorithm">策略</Link>
               },
               {
                 key: 'Quote',
+                icon: <DeliveredProcedureOutlined />,
+                label: <Link to="/quote">交易所api接口</Link>
+              },
+              {
+                key: 'Login',
                 icon: <UserOutlined />,
-                label: <Link to="/quote">Quote</Link>
+                label: <Link to="/login">Login</Link>
               },
             ]}
             onClick={onChangeMenu}
