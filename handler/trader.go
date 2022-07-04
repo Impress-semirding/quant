@@ -129,7 +129,7 @@ func (runner) Switch(req model.Trader, ctx rpc.Context) (resp response) {
 		resp.Message = fmt.Sprint(err)
 		return
 	}
-	if err := trader.Switch(req.ID); err != nil {
+	if err := trader.Switch(req.ID, req.Api); err != nil {
 		resp.Message = fmt.Sprint(err)
 		return
 	}

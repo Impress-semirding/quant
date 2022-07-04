@@ -45,11 +45,11 @@ export function TraderList(algorithmId) {
 // Put
 
 function traderPutRequest() {
-  return { type: actions.TRADER_PUT_REQUEST };
+  return { type: actions.TRADER_PUT_REQUEST }
 }
 
 function traderPutSuccess() {
-  return { type: actions.TRADER_PUT_SUCCESS };
+  return { type: actions.TRADER_PUT_SUCCESS }
 }
 
 function traderPutFailure(message) {

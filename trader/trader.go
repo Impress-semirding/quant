@@ -8,6 +8,7 @@ import (
 	"github.com/Impress-semirding/quant/api"
 	"github.com/Impress-semirding/quant/constant"
 	"github.com/Impress-semirding/quant/model"
+	taskLib "github.com/Impress-semirding/quant/task"
 	"github.com/robertkrimen/otto"
 )
 
@@ -37,11 +38,11 @@ func GetTraderStatus(id int64) (status int64) {
 }
 
 // Switch ...
-func Switch(id int64) (err error) {
+func Switch(id, api int64) (err error) {
 	if GetTraderStatus(id) > 0 {
 		return stop(id)
 	}
-	return run(id)
+	return run(id, api)
 }
 
 //核心是初始化js运行环境，及其可以调用的api
@@ -143,7 +144,7 @@ func initialize(id int64) (trader Global, err error) {
 // }
 
 // run ...
-func run(id int64) (err error) {
+func run(id, api int64) (err error) {
 	trader, err := initialize(id)
 	if err != nil {
 		return
@@ -167,7 +168,10 @@ func run(id int64) (err error) {
 		if _, err := trader.ctx.Run(trader.Algorithm.Script); err != nil {
 			trader.Logger.Log(constant.ERROR, "", 0.0, 0.0, err)
 		}
-		if main, err := trader.ctx.Get("main"); err != nil || !main.IsFunction() {
+
+		if subscribe, err := trader.ctx.Get("subscribe"); err == nil && subscribe.IsFunction() {
+			taskLib.SubscribeById(api, pipeChanOtto(subscribe))
+		} else if main, err := trader.ctx.Get("main"); err != nil || !main.IsFunction() {
 			trader.Logger.Log(constant.ERROR, "", 0.0, 0.0, "Can not get the main function")
 		} else {
 			if _, err := main.Call(main); err != nil {
@@ -177,6 +181,20 @@ func run(id int64) (err error) {
 	}()
 	Executor[trader.ID] = &trader
 	return
+}
+
+func pipeChanOtto(subscribe otto.Value) func(ch chan taskLib.DataEvent) {
+	return func(ch chan taskLib.DataEvent) {
+		for {
+			select {
+			case d := <-ch:
+				if _, err := subscribe.Call(subscribe, d); err != nil {
+					//trader.Logger.Log(constant.ERROR, "", 0.0, 0.0, err)
+				}
+				fmt.Println("ch:", d)
+			}
+		}
+	}
 }
 
 // getStatus ...

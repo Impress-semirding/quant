@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Select, Row, Col, Tooltip, Input, Button, notification, Table, Modal, Form } from 'antd';
+import { Badge, Dropdown, Select, Row, Col, Tooltip, Menu, Input, Button, notification, Table, Modal, Form } from 'antd';
 import { algorithmList } from '../../actions/algorithm';
 import { exchangeList } from '../../actions/exchange';
 import { list as apiList } from '../../actions/apiConfig';
+import { traderSave, traderList, traderDelete, traderSwitch } from '../../actions/trader';
 import styles from './index.module.scss';
 
 
@@ -29,6 +30,7 @@ function Algorithm() {
 	const [apis, setApis] = useState([]);
 	const [isTraderVisible, setVisible] = useState(false);
 	const [trader, setTrader] = useState(null);
+	const [traderMap, setTraderMap] = useState({});
 	const onHandleEdit = () => { };
 	const onHandleTraderEdit = (record) => {
 		console.log(record)
@@ -42,6 +44,28 @@ function Algorithm() {
 	const handleCancel = () => {
 
 	}
+
+	const handleTraderDelete = (req) => {
+		Modal.confirm({
+			title: 'Are you sure to delete ?',
+			onOk: () => {
+				traderDelete(req.id)
+			},
+			iconType: 'exclamation-circle',
+		});
+	}
+
+	const handleTraderSwitch = (req) => {
+		traderSwitch(req);
+	}
+
+	const handleTraderLog = (info) => {
+		const { dispatch } = this.props;
+
+		dispatch(TraderCache(info));
+		browserHistory.push('/algorithmLog');
+	}
+
 	const reload = () => { }
 	const handleEdit = () => { }
 	const handleDelete = () => { }
@@ -73,6 +97,39 @@ function Algorithm() {
 		),
 	}];
 
+	const expcolumns = [{
+		title: 'Name',
+		dataIndex: 'name',
+		// render: (v, r) => <a onClick={this.handleTraderEdit.bind(this, r, null)}>{v}</a>,
+	}, {
+		title: 'Status',
+		dataIndex: 'status',
+		render: (v) => (v > 0 ? <Badge status="processing" text="RUN" /> : <Badge status="default" text="HALT" />),
+	}, {
+		title: 'CreatedAt',
+		dataIndex: 'createdAt',
+		render: (v) => v.toLocaleDateString(),
+	}, {
+		title: 'UpdatedAt',
+		dataIndex: 'updatedAt',
+		render: (v) => v.toLocaleDateString(),
+	}, {
+		title: 'Action',
+		key: 'action',
+		render: (v, r) => (
+			<Dropdown.Button type="ghost" onClick={handleTraderSwitch.bind(null, r)} overlay={
+				<Menu>
+					<Menu.Item key="log">
+						<a type="ghost" onClick={handleTraderLog.bind(null, r)}>View Log</a>
+					</Menu.Item>
+					<Menu.Item key="delete">
+						<a type="ghost" onClick={handleTraderDelete.bind(null, r)}>Delete It</a>
+					</Menu.Item>
+				</Menu>
+			}>{r.status > 0 ? 'Stop' : 'Run'}</Dropdown.Button>
+		),
+	}];
+
 	useEffect(() => {
 		loadList()
 		loadExchanges();
@@ -95,8 +152,50 @@ function Algorithm() {
 		setApis(data);
 	}
 
-	console.log(apis)
+	console.log(trader)
 	const [form] = Form.useForm();
+
+
+	const expandedRowRender = (r) => {
+		const data = traderMap[r.id];
+
+		if (data && data.length > 0) {
+			return (
+				<Table className="womende" rowKey="id"
+					size="middle"
+					pagination={false}
+					columns={expcolumns}
+					// loading={trader.loading}
+					dataSource={data}
+				/>
+			);
+		}
+
+		if (!trader?.loading) {
+			return (
+				<p>
+					No Trader under this algorithm
+				</p>
+			);
+		}
+	};
+
+	const onExpandedRowsChange = async (ids) => {
+		let newMap = {};
+		for (let i = 0; i < ids.length; i++) {
+			if (!traderMap[ids[i]]) {
+				const data = await traderList(ids[i]);
+				newMap[ids[i]] = data;
+			}
+
+		}
+
+		setTraderMap(pre => ({
+			...pre,
+			...newMap,
+		}))
+	}
+
 	return (
 		<div>
 			<div className={styles.toolbar}>
@@ -106,7 +205,8 @@ function Algorithm() {
 			</div>
 			<Table rowKey="id"
 				columns={columns}
-				// expandedRowRender={expandedRowRender}
+				expandedRowRender={expandedRowRender}
+				onExpandedRowsChange={onExpandedRowsChange}
 				dataSource={data}
 				// rowSelection={rowSelection}
 				// pagination={pagination}
@@ -119,13 +219,15 @@ function Algorithm() {
 				title="Create a new collection"
 				okText="Create"
 				cancelText="Cancel"
-				// onCancel={onCancel}
+				onCancel={() => setVisible(false)}
 				onOk={() => {
 					form
 						.validateFields()
 						.then(values => {
 							form.resetFields();
-							onCreate(values);
+							const exs = exchanges.filter((ex) => values.exchanges.includes(ex.id))
+							traderSave({ ...values, algorithmId: trader.id, exchanges: exs })
+							setVisible(false)
 						})
 						.catch(info => {
 							console.log('Validate Failed:', info);
@@ -145,10 +247,9 @@ function Algorithm() {
 					>
 						<Input placeholder="请输入名称" />
 					</Form.Item>
-					<Form.Item name="API" label="API">
+					<Form.Item name="api" label="API">
 						<Select
 							placeholder="请选择行情数据来源"
-							// onChange={this.onGenderChange}
 							allowClear
 						>
 							{
@@ -156,10 +257,14 @@ function Algorithm() {
 							}
 						</Select>
 					</Form.Item>
-					<Form.Item name="exchanges" label="Exchanges">
+					<Form.Item
+						name="exchanges"
+						label="Exchanges"
+						rules={[{ required: true, message: '请选择交易所' }]}
+					>
 						<Select
+							mode="multiple"
 							placeholder="请选择交易所"
-							// onChange={this.onGenderChange}
 							allowClear
 						>
 							{

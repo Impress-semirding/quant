@@ -12,6 +12,7 @@ type Trader struct {
 	ID          int64      `gorm:"primary_key" json:"id"`
 	UserID      int64      `gorm:"index" json:"userId"`
 	AlgorithmID int64      `gorm:"index" json:"algorithmId"`
+	Api         int64      `gorm:"index" json:"api"`
 	Name        string     `gorm:"type:varchar(200)" json:"name"`
 	Environment string     `gorm:"type:text" json:"environment"`
 	LastRunAt   time.Time  `json:"lastRunAt"`

@@ -55,6 +55,13 @@ func (t *Task) Sub(callback SubscribeFuncType) (c chan DataEvent) {
 	return ch
 }
 
+type callbackType = func(ch chan DataEvent)
+
+func SubscribeById(id int64, callback callbackType) {
+	task := GetTask(id)
+	task.Sub(callback)
+}
+
 func (t *Task) Pub(data interface{}) {
 	go eb.Publish(t.Topic, data)
 }
