@@ -196,6 +196,8 @@ function Algorithm() {
 		}))
 	}
 
+	console.log(traderMap)
+
 	return (
 		<div>
 			<div className={styles.toolbar}>

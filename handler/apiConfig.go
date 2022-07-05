@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Impress-semirding/quant/api"
 	"github.com/Impress-semirding/quant/constant"
 	"github.com/Impress-semirding/quant/model"
 	taskLib "github.com/Impress-semirding/quant/task"
@@ -137,9 +136,11 @@ func testRunTask(instId string, period int) taskLib.RunTaskFucType {
 				fmt.Printf("ctx.Done")
 				return
 			default:
-				client := api.NewOKEX(task.Option)
-				data := client.GetKlineRecords(instId, period)
-				task.Pub(data)
+				// client := api.NewOKEX(task.Option)
+				fmt.Println("start", time.Now())
+				// data := client.GetKlineRecords(instId, period)
+				fmt.Println("end", time.Now())
+				// task.Pub(data)
 				time.Sleep(100 * time.Millisecond)
 				fmt.Println("轮训执行任务")
 			}

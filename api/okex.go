@@ -31,7 +31,7 @@ type OKEX struct {
 	*okex.OKExV5
 }
 
-func NewOKEX(opt Option) *OKEX {
+func NewOKEX(opt Option) Exchange {
 	setProxy()
 	config := goex.APIConfig{
 		Endpoint:      "https://www.okx.com",
@@ -239,7 +239,9 @@ func (o *OKEX) GetKlineRecords(currency goex.CurrencyPair, period goex.KlinePeri
 }
 
 //非个人，整个交易所的交易记录
-func (o *OKEX) GetTrades(currencyPair goex.CurrencyPair, since int64) ([]goex.Trade, error)
+func (o *OKEX) GetTrades(currencyPair goex.CurrencyPair, since int64) ([]goex.Trade, error) {
+	return nil, nil
+}
 
 func (o *OKEX) GetExchangeName() string {
 	return ""
