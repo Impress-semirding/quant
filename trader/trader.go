@@ -12,11 +12,10 @@ import (
 	"github.com/robertkrimen/otto"
 )
 
-// Trader Variabledd
 var (
-	Executor      = make(map[int64]*Global) //保存正在运行的策略，防止重复运行
+	Executor      = make(map[int64]*Global)
 	errHalt       = fmt.Errorf("HALT")
-	ExchangeMaker = map[string]func(api.Option) api.Exchange{ //保存所有交易所的构造函数
+	ExchangeMaker = map[string]func(api.Option) api.Exchange{
 		constant.Okex: api.NewOKEX,
 	}
 )

@@ -39,32 +39,7 @@ func NewOKEX(opt Option) Exchange {
 		ApiSecretKey:  opt.SecretKey,
 		ApiPassphrase: opt.Passphrase,
 	}
-
 	config.HttpClient = &http.Client{}
-	// if opt.HttpProxy != "" {
-	// 	config.HttpClient = &http.Client{
-	// 		Transport: &http.Transport{
-	// 			Proxy: func(req *http.Request) (*url.URL, error) {
-	// 				return &url.URL{
-	// 					Scheme: "socks5",
-	// 					Host:   opt.HttpProxy,
-	// 				}, nil
-	// 			},
-	// 		},
-	// 	}
-	// } else {
-	// 	config.HttpClient = &http.Client{
-	// 		Transport: &http.Transport{
-	// 			Proxy: func(req *http.Request) (*url.URL, error) {
-	// 				return &url.URL{
-	// 					Scheme: "socks5",
-	// 					Host:   "https://127.0.0.1:8001",
-	// 				}, nil
-	// 			},
-	// 		},
-	// 	}
-	// }
-
 	apiClient := okex.NewOKExV5(&config)
 
 	return &OKEX{

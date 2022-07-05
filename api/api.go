@@ -18,11 +18,11 @@ type Option struct {
 // Exchange interface
 type Exchange interface {
 	goex.API
-	Log(...interface{})                 //向管理台发送这个交易所的打印信息
-	GetType() string                    //获取交易所类型,是火币还是OKEY等。。。
-	SetLimit(times interface{}) float64 //设置交易所的API访问频率,和 E.AutoSleep() 配合使用
-	AutoSleep()                         //自动休眠以满足设置的交易所的API访问频率
-	GetMinAmount(stock string) float64  //获取交易所的最小交易数量
+	Log(...interface{})
+	GetType() string
+	SetLimit(times interface{}) float64
+	AutoSleep()
+	GetMinAmount(stock string) float64
 }
 
 var (
