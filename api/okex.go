@@ -144,60 +144,6 @@ func (e *OKEX) GetMinAmount(stock string) float64 {
 	return e.minAmountMap[stock]
 }
 
-//	获取单个产品行情信息
-func (e *OKEX) GetTicker(instId string) interface{} {
-	if _, ok := e.stockTypeMap[instId]; !ok {
-		e.Log("error instId not in stockTypeMap")
-		return nil
-	}
-	e.updateLastTime()
-	tickets, err := e.OKExV5.GetTickerV5(instId)
-	if err != nil {
-		e.Log("error", err)
-		return nil
-	}
-
-	data, _ := utils.ToMapJson(tickets)
-	return data
-}
-
-func (e *OKEX) GetKlineRecords(instId string, period int, options ...utils.OptionalParameter) []Record {
-	if _, ok := e.stockTypeMap[instId]; !ok {
-		e.Log("error instId not in stockTypeMap")
-		return nil
-	}
-
-	e.updateLastTime()
-	param := &url.Values{}
-	utils.MergeOptionalParameter(param, options...)
-
-	tickets, err := e.OKExV5.GetKlineRecordsV5(instId, goex.KlinePeriod(period), param)
-	if err != nil {
-		e.Log("error", err)
-		return nil
-	}
-
-	recordsNew := []Record{}
-	for _, v := range tickets {
-		recordsNew = append([]Record{{
-			Time:   conver.Int64Must(v[0]),
-			Open:   conver.Float64Must(v[1]),
-			High:   conver.Float64Must(v[2]),
-			Low:    conver.Float64Must(v[3]),
-			Close:  conver.Float64Must(v[4]),
-			Volume: conver.Float64Must(v[5]),
-		}}, recordsNew...)
-	}
-
-	return recordsNew
-
-	// json, err := simplejson.NewJson(tickets)
-	// if err != nil {
-	// e.logger.Log(constant.ERROR, "", 0.0, 0.0, "GetRecords() error, ", err)
-	// return false
-	// }
-}
-
 func (e *OKEX) Trade(options utils.OptionalParameter) interface{} {
 	instId, _ := options["instId"].(string)
 	tdMode, _ := options["tdMode"].(string)
@@ -274,4 +220,113 @@ func (e *OKEX) GetAccountPosition(options ...map[string]interface{}) interface{}
 
 func (e *OKEX) updateLastTime() {
 	e.lastTimes++
+}
+
+func (o *OKEX) CancelOrder(orderId string, currency goex.CurrencyPair) (bool, error) {
+	return false, nil
+}
+
+func (o *OKEX) GetAccount() (*goex.Account, error) {
+	return nil, nil
+}
+
+func (o *OKEX) GetDepth(size int, currency goex.CurrencyPair) (*goex.Depth, error) {
+	return nil, nil
+}
+
+func (o *OKEX) GetKlineRecords(currency goex.CurrencyPair, period goex.KlinePeriod, size int, optional ...goex.OptionalParameter) ([]goex.Kline, error) {
+	return nil, nil
+}
+
+//非个人，整个交易所的交易记录
+func (o *OKEX) GetTrades(currencyPair goex.CurrencyPair, since int64) ([]goex.Trade, error)
+
+func (o *OKEX) GetExchangeName() string {
+	return ""
+}
+
+func (o *OKEX) GetOneOrder(orderId string, currency goex.CurrencyPair) (*goex.Order, error) {
+	return nil, nil
+}
+
+func (o *OKEX) GetOrderHistorys(currency goex.CurrencyPair, opt ...goex.OptionalParameter) ([]goex.Order, error) {
+	return nil, nil
+}
+
+func (o *OKEX) GetTicker(currency goex.CurrencyPair) (*goex.Ticker, error) {
+	return nil, nil
+}
+
+func (o *OKEX) GetUnfinishOrders(currency goex.CurrencyPair) ([]goex.Order, error) {
+	return nil, nil
+}
+
+func (o *OKEX) LimitBuy(amount, price string, currency goex.CurrencyPair, opt ...goex.LimitOrderOptionalParameter) (*goex.Order, error) {
+	return nil, nil
+}
+
+func (o *OKEX) LimitSell(amount, price string, currency goex.CurrencyPair, opt ...goex.LimitOrderOptionalParameter) (*goex.Order, error) {
+	return nil, nil
+}
+
+func (o *OKEX) MarketBuy(amount, price string, currency goex.CurrencyPair) (*goex.Order, error) {
+	return nil, nil
+}
+
+func (o *OKEX) MarketSell(amount, price string, currency goex.CurrencyPair) (*goex.Order, error) {
+	return nil, nil
+}
+
+// 获取单个产品行情信息
+func (e *OKEX) GetInstIdTicker(instId string) interface{} {
+	if _, ok := e.stockTypeMap[instId]; !ok {
+		e.Log("error instId not in stockTypeMap")
+		return nil
+	}
+	e.updateLastTime()
+	tickets, err := e.OKExV5.GetTickerV5(instId)
+	if err != nil {
+		e.Log("error", err)
+		return nil
+	}
+
+	data, _ := utils.ToMapJson(tickets)
+	return data
+}
+
+func (e *OKEX) GetKline(instId string, period int, options ...utils.OptionalParameter) []Record {
+	if _, ok := e.stockTypeMap[instId]; !ok {
+		e.Log("error instId not in stockTypeMap")
+		return nil
+	}
+
+	e.updateLastTime()
+	param := &url.Values{}
+	utils.MergeOptionalParameter(param, options...)
+
+	tickets, err := e.OKExV5.GetKlineRecordsV5(instId, goex.KlinePeriod(period), param)
+	if err != nil {
+		e.Log("error", err)
+		return nil
+	}
+
+	recordsNew := []Record{}
+	for _, v := range tickets {
+		recordsNew = append([]Record{{
+			Time:   conver.Int64Must(v[0]),
+			Open:   conver.Float64Must(v[1]),
+			High:   conver.Float64Must(v[2]),
+			Low:    conver.Float64Must(v[3]),
+			Close:  conver.Float64Must(v[4]),
+			Volume: conver.Float64Must(v[5]),
+		}}, recordsNew...)
+	}
+
+	return recordsNew
+
+	// json, err := simplejson.NewJson(tickets)
+	// if err != nil {
+	// e.logger.Log(constant.ERROR, "", 0.0, 0.0, "GetRecords() error, ", err)
+	// return false
+	// }
 }
