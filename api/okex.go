@@ -235,6 +235,13 @@ func (o *OKEX) GetDepth(size int, currency goex.CurrencyPair) (*goex.Depth, erro
 }
 
 func (o *OKEX) GetKlineRecords(currency goex.CurrencyPair, period goex.KlinePeriod, size int, optional ...goex.OptionalParameter) ([]goex.Kline, error) {
+	options := map[string]interface{}{
+		"limit": size,
+	}
+	data := o.GetKline(currency.CurrencyA.Symbol+"-"+currency.CurrencyB.Symbol, int(period), options)
+	if len(data) > 0 {
+		return data, nil
+	}
 	return nil, nil
 }
 
@@ -296,7 +303,7 @@ func (e *OKEX) GetInstIdTicker(instId string) interface{} {
 	return data
 }
 
-func (e *OKEX) GetKline(instId string, period int, options ...utils.OptionalParameter) []Record {
+func (e *OKEX) GetKline(instId string, period int, options ...utils.OptionalParameter) []goex.Kline {
 	if _, ok := e.stockTypeMap[instId]; !ok {
 		e.Log("error instId not in stockTypeMap")
 		return nil
@@ -312,23 +319,17 @@ func (e *OKEX) GetKline(instId string, period int, options ...utils.OptionalPara
 		return nil
 	}
 
-	recordsNew := []Record{}
+	recordsNew := []goex.Kline{}
 	for _, v := range tickets {
-		recordsNew = append([]Record{{
-			Time:   conver.Int64Must(v[0]),
-			Open:   conver.Float64Must(v[1]),
-			High:   conver.Float64Must(v[2]),
-			Low:    conver.Float64Must(v[3]),
-			Close:  conver.Float64Must(v[4]),
-			Volume: conver.Float64Must(v[5]),
+		recordsNew = append([]goex.Kline{{
+			Timestamp: conver.Int64Must(v[0]),
+			Open:      conver.Float64Must(v[1]),
+			High:      conver.Float64Must(v[2]),
+			Low:       conver.Float64Must(v[3]),
+			Close:     conver.Float64Must(v[4]),
+			Vol:       conver.Float64Must(v[5]),
 		}}, recordsNew...)
 	}
 
 	return recordsNew
-
-	// json, err := simplejson.NewJson(tickets)
-	// if err != nil {
-	// e.logger.Log(constant.ERROR, "", 0.0, 0.0, "GetRecords() error, ", err)
-	// return false
-	// }
 }

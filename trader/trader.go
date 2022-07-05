@@ -16,13 +16,9 @@ import (
 var (
 	Executor      = make(map[int64]*Global) //保存正在运行的策略，防止重复运行
 	errHalt       = fmt.Errorf("HALT")
-	exchangeMaker = map[string]func(api.Option) api.Exchange{ //保存所有交易所的构造函数
+	ExchangeMaker = map[string]func(api.Option) api.Exchange{ //保存所有交易所的构造函数
 		constant.Okex: api.NewOKEX,
 	}
-
-	// okexMaker = map[string]func(api.Option) *api.OKEX{ //保存所有交易所的构造函数
-	// 	constant.Okex: api.NewOKEX,
-	// }
 )
 
 // GetTraderStatus ...
@@ -78,7 +74,7 @@ func initialize(id int64) (trader Global, err error) {
 	}
 
 	for _, e := range es {
-		if maker, ok := exchangeMaker[e.ExchangeType]; ok {
+		if maker, ok := ExchangeMaker[e.ExchangeType]; ok {
 			opt := api.Option{
 				TraderID:   trader.ID,
 				Type:       e.ExchangeType,
@@ -160,14 +156,6 @@ func pipeChanOtto(subscribe otto.Value) func(ch chan taskLib.DataEvent) {
 	}
 }
 
-// getStatus ...
-//func getStatus(id int64) (status string) {
-//	if t := Executor[id]; t != nil {
-//		status = t.statusLog
-//	}
-//	return
-//}
-
 // stop ...
 func stop(id int64) (err error) {
 	if t, ok := Executor[id]; !ok || t == nil {
@@ -176,15 +164,6 @@ func stop(id int64) (err error) {
 	Executor[id].ctx.Interrupt <- func() { panic(errHalt) }
 	return
 }
-
-// clean ...
-//func clean(userID int64) {
-//	for _, t := range Executor {
-//		if t != nil && t.UserID == userID {
-//			stop(t.ID)
-//		}
-//	}
-//}
 
 func toMap(input interface{}) (map[string]interface{}, error) {
 	data := make(map[string]interface{})

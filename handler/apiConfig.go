@@ -7,10 +7,16 @@ import (
 	"github.com/Impress-semirding/quant/constant"
 	"github.com/Impress-semirding/quant/model"
 	taskLib "github.com/Impress-semirding/quant/task"
+	"github.com/Impress-semirding/quant/trader"
 	"github.com/hprose/hprose-golang/rpc"
+	"github.com/nntaoli-project/goex"
 )
 
 type apiConfig struct{}
+
+var (
+	instIdMaps = map[string]goex.CurrencyPair{"BTC-USDT": goex.BTC_USDT, "ETH-USDT": goex.ETH_USDT}
+)
 
 //	 put
 func (apiConfig) Put(req model.ApiConfig, ctx rpc.Context) (resp response) {
@@ -104,8 +110,8 @@ func (apiConfig) Run(id int, ctx rpc.Context) (resp response) {
 
 	fmt.Println("topic", topic)
 
-	task.Sub(testChan)
-	task.Run(testRunTask(taskConfig.InstId, taskConfig.Period))
+	task.Sub(outputChan)
+	task.Run(runTask(taskConfig))
 
 	resp.Success = true
 	return
@@ -118,7 +124,7 @@ func (apiConfig) Stop(id int64, ctx rpc.Context) (resp response) {
 	return resp
 }
 
-func testChan(ch chan taskLib.DataEvent) {
+func outputChan(ch chan taskLib.DataEvent) {
 	for {
 		select {
 		case d := <-ch:
@@ -127,7 +133,7 @@ func testChan(ch chan taskLib.DataEvent) {
 	}
 }
 
-func testRunTask(instId string, period int) taskLib.RunTaskFucType {
+func runTask(taskConfig model.ApiConfig) taskLib.RunTaskFucType {
 	return func(task *taskLib.Task) {
 		ctx := task.Ctx
 		for {
@@ -136,13 +142,17 @@ func testRunTask(instId string, period int) taskLib.RunTaskFucType {
 				fmt.Printf("ctx.Done")
 				return
 			default:
-				// client := api.NewOKEX(task.Option)
-				fmt.Println("start", time.Now())
-				// data := client.GetKlineRecords(instId, period)
-				fmt.Println("end", time.Now())
-				// task.Pub(data)
-				time.Sleep(100 * time.Millisecond)
-				fmt.Println("轮训执行任务")
+				if maker, ok := trader.ExchangeMaker[taskConfig.ExchangeType]; ok {
+					client := maker(task.Option)
+					fmt.Println("start", time.Now())
+					data, err := client.GetKlineRecords(instIdMaps[taskConfig.InstId], goex.KlinePeriod(taskConfig.Period), 100)
+					if err == nil {
+						fmt.Println("end", time.Now())
+						task.Pub(data)
+						time.Sleep(100 * time.Millisecond)
+					}
+				}
+
 			}
 		}
 
