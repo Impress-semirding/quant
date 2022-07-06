@@ -29,11 +29,15 @@ func GetTraderStatus(id int64) (status int64) {
 }
 
 // Switch ...
-func Switch(id, api int64) (err error) {
+func Switch(id int64, api []model.ApiConfig) (err error) {
 	if GetTraderStatus(id) > 0 {
 		return stop(id)
 	}
-	return run(id, api)
+	if len(api) > 0 {
+		return run(id, api[0].ID)
+	}
+
+	return nil
 }
 
 //核心是初始化js运行环境，及其可以调用的api
@@ -128,6 +132,7 @@ func run(id, api int64) (err error) {
 		}
 
 		if subscribe, err := trader.ctx.Get("subscribe"); err == nil && subscribe.IsFunction() {
+			//	这里需要开发group chan接口，做多任务订阅
 			taskLib.SubscribeById(api, pipeChanOtto(subscribe))
 		} else if main, err := trader.ctx.Get("main"); err != nil || !main.IsFunction() {
 			trader.Logger.Log(constant.ERROR, "", 0.0, 0.0, "Can not get the main function")

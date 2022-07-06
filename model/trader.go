@@ -9,16 +9,16 @@ import (
 
 // Trader struct
 type Trader struct {
-	ID          int64      `gorm:"primary_key" json:"id"`
-	UserID      int64      `gorm:"index" json:"userId"`
-	AlgorithmID int64      `gorm:"index" json:"algorithmId"`
-	Api         int64      `gorm:"index" json:"api"`
-	Name        string     `gorm:"type:varchar(200)" json:"name"`
-	Environment string     `gorm:"type:text" json:"environment"`
-	LastRunAt   time.Time  `json:"lastRunAt"`
-	CreatedAt   time.Time  `json:"createdAt"`
-	UpdatedAt   time.Time  `json:"updatedAt"`
-	DeletedAt   *time.Time `sql:"index" json:"-"`
+	ID          int64       `gorm:"primary_key" json:"id"`
+	UserID      int64       `gorm:"index" json:"userId"`
+	AlgorithmID int64       `gorm:"index" json:"algorithmId"`
+	Api         []ApiConfig `gorm:"-" json:"api"`
+	Name        string      `gorm:"type:varchar(200)" json:"name"`
+	Environment string      `gorm:"type:text" json:"environment"`
+	LastRunAt   time.Time   `json:"lastRunAt"`
+	CreatedAt   time.Time   `json:"createdAt"`
+	UpdatedAt   time.Time   `json:"updatedAt"`
+	DeletedAt   *time.Time  `sql:"index" json:"-"`
 
 	Exchanges []Exchange `gorm:"-" json:"exchanges"`
 	Status    int64      `gorm:"-" json:"status"`
@@ -32,6 +32,15 @@ type TraderExchange struct {
 	ExchangeID int64 `gorm:"index"`
 
 	Exchange `gorm:"-"`
+}
+
+// TraderExchange struct
+type TraderApiConfig struct {
+	ID          int64 `gorm:"primary_key"`
+	TraderID    int64 `gorm:"index"`
+	ApiConfigID int64 `gorm:"index"`
+
+	ApiConfig `gorm:"-"`
 }
 
 // ListTrader ...

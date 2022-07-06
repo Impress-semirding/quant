@@ -152,7 +152,7 @@ function Algorithm() {
 		setApis(data);
 	}
 
-	console.log(trader)
+	console.log("apis", apis)
 	const [form] = Form.useForm();
 
 
@@ -227,8 +227,9 @@ function Algorithm() {
 						.validateFields()
 						.then(values => {
 							form.resetFields();
-							const exs = exchanges.filter((ex) => values.exchanges.includes(ex.id))
-							traderSave({ ...values, algorithmId: trader.id, exchanges: exs })
+							const exs = exchanges?.filter((ex) => values?.exchanges?.includes(ex.id))
+							const fapi = apis.filter(item => values.api.includes(item.id))
+							traderSave({ ...values, api: fapi, algorithmId: trader.id, exchanges: exs })
 							setVisible(false)
 						})
 						.catch(info => {
@@ -251,18 +252,20 @@ function Algorithm() {
 					</Form.Item>
 					<Form.Item name="api" label="API">
 						<Select
+							mode="multiple"
 							placeholder="请选择行情数据来源"
 							allowClear
+							rules={[{ required: true, message: '请选择api' }]}
 						>
 							{
-								apis.map(item => <Option value={item.id}>{item.exchangeType}-{item.funcName}-{item.instId}-{periods[item.period]}</Option>)
+								apis.map(item => <Option disabled={item.status !== 'Y'} value={item.id}>{item.exchangeType}-{item.funcName}-{item.instId}-{periods[item.period]}</Option>)
 							}
 						</Select>
 					</Form.Item>
 					<Form.Item
 						name="exchanges"
 						label="Exchanges"
-						rules={[{ required: true, message: '请选择交易所' }]}
+
 					>
 						<Select
 							mode="multiple"

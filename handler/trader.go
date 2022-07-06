@@ -69,6 +69,17 @@ func (runner) Put(req model.Trader, ctx rpc.Context) (resp response) {
 		resp.Message = fmt.Sprint(err)
 		return
 	}
+	for _, v := range req.Api {
+		traderApi := model.TraderApiConfig{
+			TraderID:    req.ID,
+			ApiConfigID: v.ID,
+		}
+		if err := db.Create(&traderApi).Error; err != nil {
+			db.Rollback()
+			resp.Message = fmt.Sprint(err)
+			return
+		}
+	}
 	for _, e := range req.Exchanges {
 		traderExchange := model.TraderExchange{
 			TraderID:   req.ID,
