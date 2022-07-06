@@ -9,7 +9,6 @@ import (
 	"github.com/Impress-semirding/quant/model"
 	"github.com/Impress-semirding/quant/utils"
 	"github.com/miaolz123/conver"
-
 	"github.com/nntaoli-project/goex"
 	"github.com/nntaoli-project/goex/okex/v5"
 )
@@ -179,18 +178,6 @@ func (e *OKEX) Trade(options utils.OptionalParameter) interface{} {
 	}
 	// return res
 	return res.OrdId
-}
-
-func (e *OKEX) GetAccountPosition(options ...map[string]interface{}) interface{} {
-	e.updateLastTime()
-	res, err := e.OKExV5.GetAccountPosition()
-
-	if err != nil {
-		e.Log("error, GetAccountPosition error")
-		return nil
-	}
-
-	return res
 }
 
 func (e *OKEX) updateLastTime() {

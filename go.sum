@@ -69,6 +69,8 @@ github.com/mattn/go-sqlite3 v1.9.1-0.20180719091609-b3511bfdd742/go.mod h1:FPy6K
 github.com/miaolz123/conver v0.0.0-20160420140702-15152279f21e h1:fEAf+HnY9ZQOa6fZKiTM5bLVU+akTpQQYDMS7SPtDms=
 github.com/miaolz123/conver v0.0.0-20160420140702-15152279f21e/go.mod h1:M2rmV2PjveveydNqYL7F+n1FI6u00cfKbuHOF7Z8ImU=
 github.com/modocache/gover v0.0.0-20171022184752-b58185e213c5/go.mod h1:caMODM3PzxT8aQXRPkAt8xlV/e7d7w8GM5g0fa5F0D8=
+github.com/nntaoli-project/goex v1.0.9-0.20220623083827-3e58f5e8b0cd h1:IkTiHqIRYXLdmIMieYgCClpwsHnxW3oRYSADk5MoFSk=
+github.com/nntaoli-project/goex v1.0.9-0.20220623083827-3e58f5e8b0cd/go.mod h1:2c1QjaxQdnH6bpWaA0U2fEKzuOGXPAJis/wzXKRe2IE=
 github.com/nubo/jwt v0.0.0-20150918093313-da5b79c3bbaf/go.mod h1:LuR7jHS+7SJ6EywD7zZiO6h0vwTBSevFk5wunVt3gf4=
 github.com/pkg/browser v0.0.0-20180916011732-0a3d74bf9ce4/go.mod h1:4OwLy04Bl9Ef3GJJCoec+30X3LQs/0/m4HFRt/2LUSA=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=

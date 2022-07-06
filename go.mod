@@ -11,7 +11,7 @@ require (
 	github.com/jinzhu/gorm v1.9.1
 	github.com/markcheno/go-talib v0.0.0-20190307022042-cd53a9264d70
 	github.com/miaolz123/conver v0.0.0-20160420140702-15152279f21e
-	github.com/nntaoli-project/goex v0.0.0-00010101000000-000000000000
+	github.com/nntaoli-project/goex v1.0.9-0.20220623083827-3e58f5e8b0cd
 	github.com/robertkrimen/otto v0.0.0-20180617131154-15f95af6e78d
 	github.com/sevlyar/go-daemon v0.1.5
 )
@@ -41,7 +41,3 @@ require (
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
-
-replace github.com/nntaoli-project/goex => ./goex
-
-replace github.com/nntaoli-project/goex/builder => ./goex/builder
