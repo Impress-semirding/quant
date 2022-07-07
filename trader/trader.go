@@ -15,7 +15,7 @@ import (
 var (
 	Executor      = make(map[int64]*Global)
 	errHalt       = fmt.Errorf("HALT")
-	ExchangeMaker = map[string]func(api.Option) api.Exchange{
+	ExchangeMaker = map[string]func(arg interface{}) api.Exchange{
 		constant.Okex: api.NewOKEX,
 	}
 )
@@ -34,7 +34,7 @@ func Switch(id int64, api []model.ApiConfig) (err error) {
 		return stop(id)
 	}
 	if len(api) > 0 {
-		return run(id, api[0].ID)
+		return run(id, api)
 	}
 
 	return nil
@@ -106,7 +106,7 @@ func initialize(id int64) (trader Global, err error) {
 }
 
 // run ...
-func run(id, api int64) (err error) {
+func run(id int64, apis []model.ApiConfig) (err error) {
 	trader, err := initialize(id)
 	if err != nil {
 		return
@@ -133,7 +133,12 @@ func run(id, api int64) (err error) {
 
 		if subscribe, err := trader.ctx.Get("subscribe"); err == nil && subscribe.IsFunction() {
 			//	这里需要开发group chan接口，做多任务订阅
-			taskLib.SubscribeById(api, pipeChanOtto(subscribe))
+			ids := []int64{}
+			for _, v := range apis {
+				ids = append(ids, v.ID)
+			}
+			taskLib.RunGroupTask(ids, pipeChanOtto(subscribe))
+			//taskLib.SubscribeById(apis, pipeChanOtto(subscribe))
 		} else if main, err := trader.ctx.Get("main"); err != nil || !main.IsFunction() {
 			trader.Logger.Log(constant.ERROR, "", 0.0, 0.0, "Can not get the main function")
 		} else {

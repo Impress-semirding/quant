@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -102,16 +103,20 @@ func (apiConfig) Run(id int, ctx rpc.Context) (resp response) {
 
 	topic := taskConfig.ExchangeType + "-" + taskConfig.FuncName + "-" + taskConfig.InstId + "-" + fmt.Sprint(taskConfig.Period)
 	fmt.Println("topic", topic)
-	task := taskLib.NewTask(taskLib.Task{
-		TaskId: taskConfig.ID,
-		//Option: option,
-		Topic: topic,
-	})
+
+	cctx, cancel := context.WithCancel(context.Background())
+	task := taskLib.Task{
+		TaskId:    taskConfig.ID,
+		Topic:     topic,
+		ApiConfig: taskConfig,
+		Ctx:       cctx,
+		Cancel:    cancel,
+	}
 
 	fmt.Println("topic", topic)
 
 	task.Sub(outputChan)
-	task.Run(runTask(taskConfig))
+	task.Run(runTask)
 
 	resp.Success = true
 	return
@@ -133,28 +138,27 @@ func outputChan(ch chan taskLib.DataEvent) {
 	}
 }
 
-func runTask(taskConfig model.ApiConfig) taskLib.RunTaskFucType {
-	return func(task *taskLib.Task) {
-		ctx := task.Ctx
-		for {
-			select {
-			case <-ctx.Done():
-				fmt.Printf("ctx.Done")
-				return
-			default:
-				if maker, ok := trader.ExchangeMaker[taskConfig.ExchangeType]; ok {
-					client := maker(task.Option)
-					fmt.Println("start", time.Now())
-					data, err := client.GetKlineRecords(instIdMaps[taskConfig.InstId], goex.KlinePeriod(taskConfig.Period), 100)
-					if err == nil {
-						fmt.Println("end", time.Now())
-						task.Pub(data)
-						time.Sleep(100 * time.Millisecond)
-					}
+func runTask(task *taskLib.Task) {
+	ctx := task.Ctx
+	taskConfig := task.ApiConfig
+	for {
+		select {
+		case <-ctx.Done():
+			fmt.Printf("ctx.Done")
+			return
+		default:
+			if maker, ok := trader.ExchangeMaker[taskConfig.ExchangeType]; ok {
+				client := maker(nil)
+				fmt.Println("start", time.Now())
+				data, err := client.GetKlineRecords(instIdMaps[taskConfig.InstId], goex.KlinePeriod(taskConfig.Period), 100)
+				if err == nil {
+					fmt.Println("end", time.Now())
+					task.Pub(data)
+					time.Sleep(100 * time.Millisecond)
 				}
-
 			}
-		}
 
+		}
 	}
+
 }

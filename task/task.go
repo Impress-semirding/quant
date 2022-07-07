@@ -3,17 +3,16 @@ package task
 import (
 	"context"
 	"fmt"
-
-	"github.com/Impress-semirding/quant/api"
+	"github.com/Impress-semirding/quant/model"
 )
 
 type Task struct {
 	TaskId int64
 	Topic  string
 	status int64
-	api.Option
 	Ctx    context.Context
 	Cancel context.CancelFunc
+	model.ApiConfig
 }
 
 type SubscribeFuncType = func(ch chan DataEvent)
@@ -23,17 +22,6 @@ type RunTaskFucType = func(t *Task)
 var (
 	ExecutorTask = make(map[int64]*Task)
 )
-
-func NewTask(p Task) (t *Task) {
-	ctx, cancel := createTaskContext(p.TaskId)
-	return &Task{
-		TaskId: p.TaskId,
-		Topic:  p.Topic,
-		Option: p.Option,
-		Ctx:    ctx,
-		Cancel: cancel,
-	}
-}
 
 func (t *Task) Run(taskfunc RunTaskFucType) {
 	if t := ExecutorTask[t.TaskId]; t != nil && t.status > 0 {
@@ -47,23 +35,16 @@ func (t *Task) Run(taskfunc RunTaskFucType) {
 	go taskfunc(t)
 }
 
+func (t *Task) Pub(data interface{}) {
+	go eb.Publish(t.Topic, data)
+}
+
 func (t *Task) Sub(callback SubscribeFuncType) (c chan DataEvent) {
 	ch := make(chan DataEvent)
 	eb.Subscribe(t.Topic, ch)
 	go callback(ch)
 
 	return ch
-}
-
-type callbackType = func(ch chan DataEvent)
-
-func SubscribeById(id int64, callback callbackType) {
-	task := GetTask(id)
-	task.Sub(callback)
-}
-
-func (t *Task) Pub(data interface{}) {
-	go eb.Publish(t.Topic, data)
 }
 
 func Stop(id int64) bool {
@@ -87,11 +68,6 @@ func GetTaskStatus(id int64) (status int64) {
 		status = t.status
 	}
 	return
-}
-
-func createTaskContext(id int64) (c context.Context, ca context.CancelFunc) {
-	ctx, cancel := context.WithCancel(context.Background())
-	return ctx, cancel
 }
 
 func GetTask(id int64) (t *Task) {

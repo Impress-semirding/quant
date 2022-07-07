@@ -30,13 +30,18 @@ type OKEX struct {
 	*okex.OKExV5
 }
 
-func NewOKEX(opt Option) Exchange {
+func NewOKEX(opt interface{}) Exchange {
 	setProxy()
-	config := goex.APIConfig{
-		Endpoint:      "https://www.okx.com",
-		ApiKey:        opt.AccessKey,
-		ApiSecretKey:  opt.SecretKey,
-		ApiPassphrase: opt.Passphrase,
+
+	config := goex.APIConfig{Endpoint: "https://www.okx.com"}
+
+	if v, ok := opt.(Option); ok {
+		config = goex.APIConfig{
+			Endpoint:      "https://www.okx.com",
+			ApiKey:        v.AccessKey,
+			ApiSecretKey:  v.SecretKey,
+			ApiPassphrase: v.Passphrase,
+		}
 	}
 	config.HttpClient = &http.Client{}
 	apiClient := okex.NewOKExV5(&config)
@@ -73,8 +78,6 @@ func NewOKEX(opt Option) Exchange {
 			"ONT/ETH":   0.001,
 		},
 		records:   make(map[string][]Record),
-		logger:    model.Logger{TraderID: opt.TraderID, ExchangeType: opt.Type},
-		option:    opt,
 		limit:     10.0,
 		lastSleep: time.Now().UnixNano(),
 		OKExV5:    apiClient,
