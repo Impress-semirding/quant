@@ -149,12 +149,12 @@ func runTask(task *taskLib.Task) {
 		default:
 			if maker, ok := trader.ExchangeMaker[taskConfig.ExchangeType]; ok {
 				client := maker(nil)
-				fmt.Println("start", time.Now())
+				fmt.Println("start taskConfig.Period", taskConfig.Period)
 				data, err := client.GetKlineRecords(instIdMaps[taskConfig.InstId], goex.KlinePeriod(taskConfig.Period), 100)
 				if err == nil {
-					fmt.Println("end", time.Now())
+					fmt.Println("end taskConfig.Period", taskConfig.Period)
 					task.Pub(data)
-					time.Sleep(100 * time.Millisecond)
+					time.Sleep(1000 * time.Millisecond)
 				}
 			}
 

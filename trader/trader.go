@@ -151,15 +151,15 @@ func run(id int64, apis []model.ApiConfig) (err error) {
 	return
 }
 
-func pipeChanOtto(subscribe otto.Value) func(ch chan taskLib.DataEvent) {
-	return func(ch chan taskLib.DataEvent) {
+func pipeChanOtto(subscribe otto.Value) func(ch chan []interface{}) {
+	return func(ch chan []interface{}) {
 		for {
 			select {
 			case d := <-ch:
 				if _, err := subscribe.Call(subscribe, d); err != nil {
 					//trader.Logger.Log(constant.ERROR, "", 0.0, 0.0, err)
 				}
-				fmt.Println("ch:", d)
+				fmt.Println("ch-r:", d)
 			}
 		}
 	}

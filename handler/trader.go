@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"github.com/miaolz123/conver"
 
 	"github.com/Impress-semirding/quant/constant"
 	"github.com/Impress-semirding/quant/model"
@@ -140,10 +141,26 @@ func (runner) Switch(req model.Trader, ctx rpc.Context) (resp response) {
 		resp.Message = fmt.Sprint(err)
 		return
 	}
-	if err := trader.Switch(req.ID, req.Api); err != nil {
+
+	var traders model.Trader
+	var traderApis []model.TraderApiConfig
+	var api []model.ApiConfig
+	var ids = []string{}
+	if req.ID > 0 {
+		model.DB.Where("id = ?", req.ID).Find(&traders)
+		model.DB.Model(traders).Related(&traderApis)
+		for _, v := range traderApis {
+			s, _ := conver.String(v.ApiConfigID)
+			ids = append(ids, s)
+		}
+		model.DB.Where("id IN (?)", ids).Find(&api)
+	}
+
+	if err := trader.Switch(req.ID, api); err != nil {
 		resp.Message = fmt.Sprint(err)
 		return
 	}
+
 	resp.Success = true
 	return
 }
