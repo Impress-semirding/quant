@@ -137,8 +137,7 @@ func run(id int64, apis []model.ApiConfig) (err error) {
 			for _, v := range apis {
 				ids = append(ids, v.ID)
 			}
-			go taskLib.RunGroupTask(ids, runClientSubscribe(subscribe))
-			//taskLib.SubscribeById(apis, pipeChanOtto(subscribe))
+			go taskLib.RunGroupTask(ids, runClientSubscribe(trader, subscribe))
 		} else if main, err := trader.ctx.Get("main"); err != nil || !main.IsFunction() {
 			trader.Logger.Log(constant.ERROR, "", 0.0, 0.0, "Can not get the main function")
 		} else {
@@ -151,10 +150,24 @@ func run(id int64, apis []model.ApiConfig) (err error) {
 	return
 }
 
-func runClientSubscribe(subscribe otto.Value) func(data []interface{}) {
+//recordsNew := []Record{}
+//for _, v := range tickets {
+//recordsNew = append([]Record{{
+//Time:   conver.Int64Must(v[0]),
+//Open:   conver.Float64Must(v[1]),
+//High:   conver.Float64Must(v[2]),
+//Low:    conver.Float64Must(v[3]),
+//Close:  conver.Float64Must(v[4]),
+//Volume: conver.Float64Must(v[5]),
+//}}, recordsNew...)
+//}
+func runClientSubscribe(trader Global, subscribe otto.Value) func(data []interface{}) {
 	return func(data []interface{}) {
-		if _, err := subscribe.Call(subscribe, data); err != nil {
-			//trader.Logger.Log(constant.ERROR, "", 0.0, 0.0, err)
+		//for k, v := range data {
+		//
+		//}
+		if _, err := subscribe.Call(subscribe, data...); err != nil {
+			trader.Logger.Log(constant.ERROR, "", 0.0, 0.0, err)
 		}
 	}
 }

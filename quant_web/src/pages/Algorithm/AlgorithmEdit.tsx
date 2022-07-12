@@ -1,102 +1,104 @@
 import React from 'react'
-import { browserHistory } from 'react-router';
+import { useRecoilValue } from 'recoil';
 import { useNavigate } from "react-router-dom";
 import MonacoEditor from 'react-monaco-editor';
-import { Row, Col, Tooltip, Input, Form, Button, notification, message } from 'antd';
+import { Input, Form, Button, notification, message } from 'antd';
+
 import { algorithmSave } from '../../actions/algorithm';
+import { algState } from '../../models';
+import './userWorker';
 import styles from './index.module.scss';
 
 
 const formItemLayout = {
-	labelCol: {
-		xs: { span: 24 },
-		sm: { span: 0 },
-	},
-	wrapperCol: {
-		xs: { span: 24 },
-		sm: { span: 24 },
-	},
+  labelCol: {
+    xs: { span: 24 },
+    sm: { span: 0 },
+  },
+  wrapperCol: {
+    xs: { span: 24 },
+    sm: { span: 24 },
+  },
 };
 
 function AlgorithmEdit() {
-	const code1 = "// your original code...";
-	const navigate = useNavigate();
-	const onFinish = (values: any) => {
-		console.log('Success:', values);
-		algorithmSave(values)
-		message.success("保存策略成功")
-		navigate("./algorithm", { replace: true });
-	};
+  const code = "// your original code...";
+  const navigate = useNavigate();
+  const algDetail = useRecoilValue(algState);
 
-	const onMonacoChange = (v) => {
-		return v;
-	}
-	return (
-		<div className="container">
-			<Form
-				{...formItemLayout}
-				onFinish={onFinish}
-			>
-				{/* <div className={styles.tool}> */}
-				<Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-					<Button type="primary" htmlType="submit">
-						Submit
-					</Button>
-				</Form.Item>
-				{/* </div> */}
+  console.log(algDetail)
 
-				<Form.Item
-					name="name"
-					rules={[{ required: true, message: 'Please input your name!' }]}
-				>
-					<Input
-						placeholder="Algorithm Name"
-						defaultValue={name}
-					// onChange={this.handleNameChange}
-					// initialValue={ }
-					/>
+  const onFinish = (values: any) => {
+    algorithmSave(values)
+    message.success("保存策略成功")
+    navigate("/algorithm");
+  };
 
-				</Form.Item>
+  const onMonacoChange = (v) => {
+    return v;
+  }
 
+  return (
+    <div className="container">
+      <Form
+        {...formItemLayout}
+        initialValues={algDetail}
+        onFinish={onFinish}
+      >
+        {/* <div className={styles.tool}> */}
+        <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+          <Button type="primary" htmlType="submit">
+            Submit
+          </Button>
+        </Form.Item>
+        {/* </div> */}
 
-				<Form.Item
-					name="description"
-					rules={[{ required: true, message: 'Please input your description!' }]}
-				>
-					<Input
-						placeholder="Algorithm description"
-					// defaultValue={name}
-					// initialValue={ }
-					/>
+        <Form.Item
+          name="name"
+          rules={[{ required: true, message: 'Please input your name!' }]}
+        >
+          <Input
+            placeholder="Algorithm Name"
+          />
 
-				</Form.Item>
+        </Form.Item>
 
 
-				<Form.Item
-					name="script"
-					rules={[{ required: true, message: 'Please input your description!' }]}
-					getValueFromEvent={onMonacoChange}
-				>
-					<MonacoEditor
-						height={600}
-						value={code1}
-						language="javascript"
-						// className="monacoEditor"
-						// onChange={this.handleScriptChange}
-						theme={"vs-dark"}
-						options={{
-							selectOnLineNumbers: true,
-							roundedSelection: false,
-							readOnly: false,
-							cursorStyle: "line",
-							automaticLayout: false,
-						}}
-					/>
-				</Form.Item>
+        <Form.Item
+          name="description"
+          rules={[{ required: true, message: 'Please input your description!' }]}
+        >
+          <Input
+            placeholder="Algorithm description"
+          />
 
-			</Form>
-		</div>
-	)
+        </Form.Item>
+
+
+        <Form.Item
+          name="script"
+          rules={[{ required: true, message: 'Please input your description!' }]}
+          getValueFromEvent={onMonacoChange}
+          style={{ border: "1px solid #ddd" }}
+          initialValue={code}
+        >
+          <MonacoEditor
+            height={600}
+            language="javascript"
+            theme={"vs-light"}
+            options={{
+              selectOnLineNumbers: true,
+              roundedSelection: false,
+              readOnly: false,
+              cursorStyle: "line",
+              automaticLayout: false,
+            }}
+          />
+        </Form.Item>
+
+      </Form>
+    </div>
+  )
 }
 
 export default AlgorithmEdit
