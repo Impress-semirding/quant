@@ -30,8 +30,8 @@ function Log() {
 
   const reload = async () => {
     const { total, list } = await logList(traderLog, pagination, filter);
-    console.log(total, list);
     setData({ total, list })
+    setPagination(pag => ({ ...pag, total }))
     // dispatch(LogList(trader.cache, pagination, this.filters));
   }
 
@@ -83,8 +83,6 @@ function Log() {
     title: 'Message',
     dataIndex: 'message',
   }];
-
-  console.log(data)
 
   return (
     <div>

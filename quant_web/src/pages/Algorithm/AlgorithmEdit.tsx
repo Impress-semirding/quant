@@ -26,8 +26,6 @@ function AlgorithmEdit() {
   const navigate = useNavigate();
   const algDetail = useRecoilValue(algState);
 
-  console.log(algDetail)
-
   const onFinish = (values: any) => {
     algorithmSave(values)
     message.success("保存策略成功")

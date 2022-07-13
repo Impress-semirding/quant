@@ -22,7 +22,6 @@ function App() {
   const [collapsed, setCollapsed] = useState(false);
 
   const onChangeMenu = ({ item, key, keyPath, domEvent }) => {
-    console.log(key);
   }
 
   return (
