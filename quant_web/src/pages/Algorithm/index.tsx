@@ -6,7 +6,7 @@ import { algorithmList } from '../../actions/algorithm';
 import { exchangeList } from '../../actions/exchange';
 import { list as apiList } from '../../actions/apiConfig';
 import { traderSave, traderList, traderDelete, traderSwitch } from '../../actions/trader';
-import { algState } from '../../models';
+import { algState, traderState } from '../../models';
 import styles from './index.module.scss';
 
 
@@ -35,6 +35,7 @@ function Algorithm() {
   const [trader, setTrader] = useState(null);
   const [traderMap, setTraderMap] = useState({});
   const setAlg = useSetRecoilState(algState);
+  const setTraderLog = useSetRecoilState(traderState);
 
   const navigate = useNavigate();
   const onHandleEdit = (r) => {
@@ -70,10 +71,8 @@ function Algorithm() {
   }
 
   const handleTraderLog = (info) => {
-    const { dispatch } = this.props;
-
-    dispatch(TraderCache(info));
-    browserHistory.push('/algorithmLog');
+    setTraderLog(info);
+    navigate(`/traderLog/${info.id}`);
   }
 
   const reload = () => { }
@@ -162,7 +161,6 @@ function Algorithm() {
     setApis(data);
   }
 
-  console.log("apis", apis)
   const [form] = Form.useForm();
 
 
@@ -195,6 +193,7 @@ function Algorithm() {
     for (let i = 0; i < ids.length; i++) {
       if (!traderMap[ids[i]]) {
         const data = await traderList(ids[i]);
+        console.log(data);
         newMap[ids[i]] = data;
       }
 
@@ -205,8 +204,6 @@ function Algorithm() {
       ...newMap,
     }))
   }
-
-  console.log(traderMap)
 
   return (
     <div>
