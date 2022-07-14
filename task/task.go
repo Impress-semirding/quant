@@ -39,12 +39,20 @@ func (t *Task) Pub(data interface{}) {
 	go eb.Publish(t.Topic, data)
 }
 
-func (t *Task) Sub(callback SubscribeFuncType) (c chan DataEvent) {
+func (t *Task) Sub(id int64, callback SubscribeFuncType) (c chan DataEvent) {
 	ch := make(chan DataEvent)
-	eb.Subscribe(t.Topic, ch)
+	idCh := DataChannel{
+		ch: ch,
+		id: id,
+	}
+	eb.Subscribe(t.Topic, idCh)
 	go callback(ch)
 
 	return ch
+}
+
+func (t *Task) RemoveListener(id int64) {
+	eb.removeListener(t.Topic, id)
 }
 
 func Stop(id int64) bool {

@@ -115,7 +115,7 @@ func (apiConfig) Run(id int, ctx rpc.Context) (resp response) {
 
 	fmt.Println("topic", topic)
 
-	task.Sub(outputChan)
+	task.Sub(99999, outputChan)
 	task.Run(runTask)
 
 	resp.Success = true

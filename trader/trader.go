@@ -31,7 +31,7 @@ func GetTraderStatus(id int64) (status int64) {
 // Switch ...
 func Switch(id int64, api []model.ApiConfig) (err error) {
 	if GetTraderStatus(id) > 0 {
-		return stop(id)
+		return stop(id, api)
 	}
 	if len(api) > 0 {
 		return run(id, api)
@@ -138,7 +138,7 @@ func run(id int64, apis []model.ApiConfig) (err error) {
 			for _, v := range apis {
 				ids = append(ids, v.ID)
 			}
-			taskLib.RunGroupTask(ids, runClientSubscribe(trader, subscribe))
+			taskLib.RunGroupTask(ids, id, runClientSubscribe(trader, subscribe))
 		} else if main, err := trader.ctx.Get("main"); err != nil || !main.IsFunction() {
 			trader.Logger.Log(constant.ERROR, "", 0.0, 0.0, "Can not get the main function")
 		} else {
@@ -173,11 +173,21 @@ func runClientSubscribe(trader Global, subscribe otto.Value) func(data []interfa
 }
 
 // stop ...
-func stop(id int64) (err error) {
+func stop(id int64, apis []model.ApiConfig) (err error) {
 	if t, ok := Executor[id]; !ok || t == nil {
 		return fmt.Errorf("Can not found the Trader")
 	}
-	Executor[id].ctx.Interrupt <- func() { panic(errHalt) }
+
+	taskIds := []int64{}
+	for _, v := range apis {
+		taskIds = append(taskIds, v.ID)
+		task := taskLib.GetTask(v.ID)
+		task.RemoveListener(id)
+	}
+
+	trader := Executor[id]
+	trader.Status = 0
+	delete(Executor, id)
 	return
 }
 

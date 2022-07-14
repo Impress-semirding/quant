@@ -2,13 +2,13 @@ package task
 
 func outputChan(ch chan DataEvent) {}
 
-func RunGroupTask(ids []int64, f func(data []interface{})) {
+func RunGroupTask(ids []int64, id int64, f func(data []interface{})) {
 	queue := []interface{}{}
 	chs := []chan DataEvent{}
 
 	for _, v := range ids {
 		task := GetTask(v)
-		c := task.Sub(outputChan)
+		c := task.Sub(id, outputChan)
 		chs = append(chs, c)
 	}
 

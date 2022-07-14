@@ -9,7 +9,10 @@ type DataEvent struct {
 	Topic string
 }
 
-type DataChannel chan DataEvent
+type DataChannel struct {
+	ch chan DataEvent
+	id int64
+}
 
 type DataChannelSlice []DataChannel
 
@@ -27,20 +30,36 @@ func (eb *EventBus) Publish(topic string, data interface{}) {
 	if chans, found := eb.subscribers[topic]; found {
 		channels := append(DataChannelSlice{}, chans...)
 		go func(data DataEvent, dataChannelSlices DataChannelSlice) {
-			for _, ch := range dataChannelSlices {
-				ch <- data
+			for _, m := range dataChannelSlices {
+				m.ch <- data
 			}
 		}(DataEvent{Data: data, Topic: topic}, channels)
 	}
 	eb.rm.RUnlock()
 }
 
-func (eb *EventBus) Subscribe(topic string, ch DataChannel) {
+func (eb *EventBus) Subscribe(topic string, m DataChannel) {
 	eb.rm.Lock()
 	if prev, found := eb.subscribers[topic]; found {
-		eb.subscribers[topic] = append(prev, ch)
+		eb.subscribers[topic] = append(prev, m)
 	} else {
-		eb.subscribers[topic] = append([]DataChannel{}, ch)
+		eb.subscribers[topic] = append([]DataChannel{}, m)
+	}
+	eb.rm.Unlock()
+}
+
+func (eb *EventBus) removeListener(topic string, id int64) {
+	eb.rm.Lock()
+	if prev, found := eb.subscribers[topic]; found {
+		index := -1
+		for k, v := range prev {
+			if v.id == id {
+				index = k
+			}
+		}
+		if index >= 0 {
+			eb.subscribers[topic] = append(prev[:index], prev[index+1:]...)
+		}
 	}
 	eb.rm.Unlock()
 }
