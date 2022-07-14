@@ -6,6 +6,7 @@ import (
 
 	"github.com/Impress-semirding/quant/constant"
 	"github.com/Impress-semirding/quant/model"
+	taskLib "github.com/Impress-semirding/quant/task"
 	"github.com/Impress-semirding/quant/trader"
 	"github.com/hprose/hprose-golang/rpc"
 )
@@ -154,6 +155,14 @@ func (runner) Switch(req model.Trader, ctx rpc.Context) (resp response) {
 			ids = append(ids, s)
 		}
 		model.DB.Where("id IN (?)", ids).Find(&api)
+	}
+
+	for _, taskConf := range api {
+		task := taskLib.GetTask(taskConf.ID)
+		if task == nil {
+			resp.Message = fmt.Sprint("交易所api任务未运行，无法订阅api数据")
+			return
+		}
 	}
 
 	if err := trader.Switch(req.ID, api); err != nil {

@@ -67,7 +67,7 @@ function Algorithm() {
   }
 
   const handleTraderSwitch = async (req) => {
-    await traderSwitch(req);
+    const res = await traderSwitch(req);
     const ids = Object.keys(traderMap);
     onExpandedRowsChange(ids);
     // const data = await traderList(ids[i]);
