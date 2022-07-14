@@ -82,7 +82,7 @@ function AlgorithmEdit() {
           initialValue={code}
         >
           <MonacoEditor
-            height={600}
+            height={1000}
             language="javascript"
             theme={"vs-light"}
             options={{
