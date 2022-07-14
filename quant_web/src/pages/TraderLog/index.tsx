@@ -4,6 +4,7 @@ import { useRecoilValue } from 'recoil';
 import { useNavigate } from "react-router-dom";
 import { traderState } from '../../models';
 import { logList } from '../../actions/log';
+import styles from './index.module.scss';
 
 
 function Log() {
@@ -86,7 +87,7 @@ function Log() {
 
   return (
     <div>
-      <div className="table-operations">
+      <div className={styles.toolbar}>
         <Button type="primary" onClick={reload}>Reload</Button>
         <Button type="ghost" onClick={handleCancel}>Back</Button>
       </div>

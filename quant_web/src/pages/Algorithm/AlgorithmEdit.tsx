@@ -27,7 +27,8 @@ function AlgorithmEdit() {
   const algDetail = useRecoilValue(algState);
 
   const onFinish = (values: any) => {
-    algorithmSave(values)
+    const payload = { ...algDetail, ...values }
+    algorithmSave(payload)
     message.success("保存策略成功")
     navigate("/algorithm");
   };
@@ -43,13 +44,13 @@ function AlgorithmEdit() {
         initialValues={algDetail}
         onFinish={onFinish}
       >
-        {/* <div className={styles.tool}> */}
-        <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-          <Button type="primary" htmlType="submit">
-            Submit
-          </Button>
-        </Form.Item>
-        {/* </div> */}
+        <div className={styles.toolbar}>
+          <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+            <Button type="primary" htmlType="submit">
+              保存
+            </Button>
+          </Form.Item>
+        </div>
 
         <Form.Item
           name="name"

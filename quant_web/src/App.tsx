@@ -26,7 +26,7 @@ function App() {
 
   return (
     <div className="App">
-      <Layout style={{ height: "100vw" }}>
+      <Layout style={{ height: "100vh" }}>
         <Sider trigger={null} collapsible collapsed={collapsed}>
           <div className="logo" />
           <Menu
@@ -66,6 +66,7 @@ function App() {
               margin: '24px 16px',
               padding: 24,
               minHeight: 280,
+              overflow: 'auto'
             }}
           >
             {element}
