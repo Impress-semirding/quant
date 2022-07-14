@@ -125,6 +125,7 @@ func run(id int64, apis []model.ApiConfig) (err error) {
 		}()
 		trader.LastRunAt = time.Now()
 		trader.Status = 1
+		Executor[trader.ID] = &trader
 
 		// RUN javascript
 		if _, err := trader.ctx.Run(trader.Algorithm.Script); err != nil {
@@ -137,7 +138,7 @@ func run(id int64, apis []model.ApiConfig) (err error) {
 			for _, v := range apis {
 				ids = append(ids, v.ID)
 			}
-			go taskLib.RunGroupTask(ids, runClientSubscribe(trader, subscribe))
+			taskLib.RunGroupTask(ids, runClientSubscribe(trader, subscribe))
 		} else if main, err := trader.ctx.Get("main"); err != nil || !main.IsFunction() {
 			trader.Logger.Log(constant.ERROR, "", 0.0, 0.0, "Can not get the main function")
 		} else {
@@ -146,7 +147,6 @@ func run(id int64, apis []model.ApiConfig) (err error) {
 			}
 		}
 	}()
-	Executor[trader.ID] = &trader
 	return
 }
 

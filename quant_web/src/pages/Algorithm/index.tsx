@@ -66,8 +66,11 @@ function Algorithm() {
     });
   }
 
-  const handleTraderSwitch = (req) => {
-    traderSwitch(req);
+  const handleTraderSwitch = async (req) => {
+    await traderSwitch(req);
+    const ids = Object.keys(traderMap);
+    onExpandedRowsChange(ids);
+    // const data = await traderList(ids[i]);
   }
 
   const handleTraderLog = (info) => {
@@ -191,12 +194,8 @@ function Algorithm() {
   const onExpandedRowsChange = async (ids) => {
     let newMap = {};
     for (let i = 0; i < ids.length; i++) {
-      if (!traderMap[ids[i]]) {
-        const data = await traderList(ids[i]);
-        console.log(data);
-        newMap[ids[i]] = data;
-      }
-
+      const data = await traderList(ids[i]);
+      newMap[ids[i]] = data;
     }
 
     setTraderMap(pre => ({
