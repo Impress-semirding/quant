@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// ApiConfig struct
 type ApiConfig struct {
 	ID           int64      `gorm:"primary_key" json:"id"`
 	UserID       int64      `gorm:"index" json:"userId"`
