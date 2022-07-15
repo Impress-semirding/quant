@@ -90,10 +90,6 @@ func initialize(id int64) (trader Global, err error) {
 			trader.es = append(trader.es, maker(opt))
 		}
 	}
-	if len(trader.okex) == 0 && len(trader.es) == 0 {
-		err = fmt.Errorf("Please add at least one exchange")
-		return
-	}
 
 	trader.ctx.Set("Global", &trader)
 	trader.ctx.Set("G", &trader)
