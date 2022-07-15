@@ -59,8 +59,10 @@ function Algorithm() {
   const handleTraderDelete = (req) => {
     Modal.confirm({
       title: 'Are you sure to delete ?',
-      onOk: () => {
-        traderDelete(req.id)
+      onOk: async () => {
+        await traderDelete(req.id)
+        const ids = Object.keys(traderMap);
+        onExpandedRowsChange(ids);
       },
       iconType: 'exclamation-circle',
     });
@@ -69,7 +71,7 @@ function Algorithm() {
   const handleTraderSwitch = async (req) => {
     const res = await traderSwitch(req);
     const ids = Object.keys(traderMap);
-    onExpandedRowsChange(ids);
+    await onExpandedRowsChange(ids);
     // const data = await traderList(ids[i]);
   }
 
@@ -231,12 +233,14 @@ function Algorithm() {
         onOk={() => {
           form
             .validateFields()
-            .then(values => {
+            .then(async (values) => {
               form.resetFields();
               const exs = exchanges?.filter((ex) => values?.exchanges?.includes(ex.id))
               const fapi = apis.filter(item => values.api.includes(item.id))
-              traderSave({ ...values, api: fapi, algorithmId: trader.id, exchanges: exs })
+              await traderSave({ ...values, api: fapi, algorithmId: trader.id, exchanges: exs })
               setVisible(false)
+              onExpandedRowsChange([trader.id])
+
             })
             .catch(info => {
               console.log('Validate Failed:', info);

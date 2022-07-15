@@ -103,7 +103,7 @@ func (runner) Put(req model.Trader, ctx rpc.Context) (resp response) {
 }
 
 // Delete
-func (runner) Delete(req model.Trader, ctx rpc.Context) (resp response) {
+func (runner) Delete(id int64, ctx rpc.Context) (resp response) {
 	username := ctx.GetString("username")
 	if username == "" {
 		resp.Message = constant.ErrAuthorizationError
@@ -114,11 +114,11 @@ func (runner) Delete(req model.Trader, ctx rpc.Context) (resp response) {
 		resp.Message = fmt.Sprint(err)
 		return
 	}
-	if req, err = self.GetTrader(req.ID); err != nil {
+	if _, err = self.GetTrader(id); err != nil {
 		resp.Message = fmt.Sprint(err)
 		return
 	}
-	if err := model.DB.Where("id = ?", req.ID).Delete(&model.Trader{}).Error; err != nil {
+	if err := model.DB.Where("id = ?", id).Delete(&model.Trader{}).Error; err != nil {
 		resp.Message = fmt.Sprint(err)
 	} else {
 		resp.Success = true
