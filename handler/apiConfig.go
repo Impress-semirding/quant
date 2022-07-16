@@ -154,7 +154,7 @@ func runTask(task *taskLib.Task) {
 				if err == nil {
 					fmt.Println("end taskConfig.Period", taskConfig.Period)
 					task.Pub(data)
-					time.Sleep(200 * time.Millisecond)
+					time.Sleep(500 * time.Millisecond)
 				}
 			}
 
