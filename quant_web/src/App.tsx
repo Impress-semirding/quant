@@ -45,6 +45,11 @@ function App() {
                 label: <Link to="/quote">交易所api接口</Link>
               },
               {
+                key: 'Exchange',
+                icon: <DeliveredProcedureOutlined />,
+                label: <Link to="/Exchange">交易所秘钥</Link>
+              },
+              {
                 key: 'Login',
                 icon: <UserOutlined />,
                 label: <Link to="/login">Login</Link>

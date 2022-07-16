@@ -6,6 +6,7 @@ import Algorithm from './pages/Algorithm'
 import Quote from './pages/Quote'
 import AlgorithmEdit from './pages/Algorithm/AlgorithmEdit';
 import TraderLog from "./pages/TraderLog";
+import Exchange from './pages/Exchange';
 
 const routes: RouteObject[] = [
   {
@@ -14,9 +15,10 @@ const routes: RouteObject[] = [
     children: [
       { path: "login", element: <Login /> },
       { path: "algorithm", element: <Algorithm /> },
-      { path: "algorithmEdit/:id", element: <AlgorithmEdit /> },
+      { path: "algorithmEdit", element: <AlgorithmEdit /> },
       { path: "traderLog/:id", element: <TraderLog /> },
       { path: "quote", element: <Quote /> },
+      { path: "exchange", element: <Exchange /> }
     ],
   },
 ];

@@ -41,7 +41,7 @@ function Algorithm() {
   const onHandleEdit = (r) => {
     console.log(r);
     setAlg(r);
-    navigate(`/algorithmEdit/${r.id}`)
+    navigate("/algorithmEdit")
   };
   const onHandleTraderEdit = (record) => {
     console.log(record)
@@ -81,7 +81,7 @@ function Algorithm() {
   }
 
   const reload = () => { }
-  const handleEdit = () => { }
+  const handleEdit = () => navigate("/algorithmEdit");
   const handleDelete = () => { }
   const selectedRowKeys = []
   const columns = [{
