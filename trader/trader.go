@@ -16,7 +16,8 @@ var (
 	Executor      = make(map[int64]*Global)
 	errHalt       = fmt.Errorf("HALT")
 	ExchangeMaker = map[string]func(arg interface{}) api.Exchange{
-		constant.Okex: api.NewOKEX,
+		constant.Okex:    api.NewOKEX,
+		constant.Binance: api.NewBinance,
 	}
 )
 
