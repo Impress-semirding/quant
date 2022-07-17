@@ -31,7 +31,7 @@ type OKEX struct {
 }
 
 func NewOKEX(opt interface{}) Exchange {
-	// setProxy()
+	setProxy()
 
 	config := goex.APIConfig{Endpoint: "https://www.okx.com"}
 
