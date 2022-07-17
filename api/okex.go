@@ -236,7 +236,39 @@ func (o *OKEX) GetUnfinishOrders(currency goex.CurrencyPair) ([]goex.Order, erro
 }
 
 func (o *OKEX) LimitBuy(amount, price string, currency goex.CurrencyPair, opt ...goex.LimitOrderOptionalParameter) (*goex.Order, error) {
-	return nil, nil
+	tdMode := "cross"
+	side := "buy"
+	ordType := "limit"
+	params := &okex.CreateOrderParam{
+		Size:      amount,
+		Price:     price,
+		Symbol:    currency.CurrencyA.Symbol + "-" + currency.CurrencyB.Symbol,
+		TradeMode: tdMode,
+		Side:      side,
+		OrderType: ordType,
+		CCY:       "USDT",
+	}
+	resp, err := o.CreateOrder(params)
+
+	if resp.SCode == "0" {
+		order := &goex.Order{
+			Price:    conver.Float64Must(price),
+			Amount:   conver.Float64Must(amount),
+			AvgPrice: conver.Float64Must(price),
+			Cid:      resp.ClientOrdId,
+			OrderID2: resp.OrdId,
+			//Status       : "ok",
+			Currency: currency,
+			//Side:      side,
+			Type:      "buy",
+			OrderType: 1,
+			//OrderTime    :
+			//FinishedTime int64
+		}
+		return order, nil
+	}
+
+	return nil, err
 }
 
 func (o *OKEX) LimitSell(amount, price string, currency goex.CurrencyPair, opt ...goex.LimitOrderOptionalParameter) (*goex.Order, error) {
