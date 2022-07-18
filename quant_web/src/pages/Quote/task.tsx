@@ -1,16 +1,11 @@
 import { Button, Form, Input, Select, Modal, Radio } from 'antd';
 import React, { useState } from 'react';
-// import { uuid as uuidv4 } from 'uuid';
+import { Values } from './type';
 
-interface Values {
-  funcName: string,
-  exchangeType: string,
-  period: string,
-}
 
 interface CreateFormProps {
   visible: boolean;
-  onCreate: (values: Values) => Promise<any>;
+  onCreate: (values: Values) => Promise<void>;
   onCancel: () => void;
 }
 

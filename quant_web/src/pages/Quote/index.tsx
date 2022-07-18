@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Button, Space, Checkbox, Form, Input, Table, Tag, Modal, message } from 'antd';
 import type { ColumnsType } from 'antd/lib/table';
 
+import { Values } from './type';
 import TaskCreateForm from './task';
 import { list, put, run, stop } from '../../actions/apiConfig';
 import { IConfigTaskItem } from '../../actions/apiConfig';
@@ -17,24 +18,18 @@ interface DataType {
   render: () => Element;
 }
 
-interface Iform {
-  funcName: string,
-  exchangeType: string,
-  period: string,
-}
-
 interface Iperiod {
   7: string,
   10: string,
   14: string,
 }
 
-const columns: ColumnsType<DataType> = [
+const columns = [
   {
     title: 'id',
     dataIndex: 'id',
     key: 'id',
-    render: text => <a>{text}</a>,
+    render: (text: string) => <a>{text}</a>,
   },
   {
     title: '交易所',
@@ -68,7 +63,7 @@ const columns: ColumnsType<DataType> = [
     title: '状态',
     key: 'status',
     dataIndex: 'status',
-    render: (text) => {
+    render: (text: string) => {
       if (text === "N") {
         return "未启动"
       } else {
@@ -93,23 +88,11 @@ export default function Quote() {
     setSata(data);
   }
 
-  const onFinish = (values: any) => {
-    console.log('Success:', values);
-  };
-
-  const onFinishFailed = (errorInfo: any) => {
-    console.log('Failed:', errorInfo);
-  };
-
   const onAddTask = () => {
     setIsModalVisible(true);
   }
 
-  const showModal = () => {
-    setIsModalVisible(true);
-  };
-
-  const handleOk = async (values) => {
+  const handleOk = async (values: Values) => {
     setIsModalVisible(false);
     await put(values)
     await loadList();

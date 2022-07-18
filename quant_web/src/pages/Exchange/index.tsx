@@ -1,4 +1,4 @@
-import { useRecoilValue, useRecoilRefresher_UNSTABLE } from 'recoil';
+import { useRecoilValue } from 'recoil';
 import React, { useEffect, useRef, useState, } from 'react';
 import { Button, Table, Modal, Form, Input, Select, notification } from 'antd';
 // import { ExchangeList, ExchangePut, ExchangeDelete } from '../actions/exchange';
@@ -12,12 +12,9 @@ const Option = Select.Option;
 
 export default function Exchange() {
   const [requestId, setRequestId] = useState(0);
-  const [messageErrorKey, setErrorKey] = useState("");
   const [selectedRowKeys, setSelectRowKeys] = useState([]);
   const [info, setInfo] = useState({});
   const [infoModalShow, setInfoModalShow] = useState(false);
-
-  const orderRef = useRef("");
 
   const [form] = Form.useForm();
   const exchangeType = useRecoilValue(exchangeTypesQuery);
@@ -43,8 +40,7 @@ export default function Exchange() {
           setSelectRowKeys([]);
           reload();
         }
-      },
-      iconType: 'exclamation-circle',
+      }
     });
   }
 
@@ -129,30 +125,29 @@ export default function Exchange() {
 
       <React.Suspense fallback={<div>加载中……</div>}>
         <MyTable requestId={requestId} onSelectChange={onSelectChange} handleInfoShow={handleInfoShow}></MyTable>
-      </React.Suspense>
 
-      <Modal closable
-        maskClosable={false}
-        width="50%"
-        title={info.name ? `Exchange - ${info.name}` : 'New Exchange'}
-        visible={infoModalShow}
-        footer=""
-        onCancel={handleInfoCancel}
-      >
-        <Form
-          form={form}
-          horizontal
+
+        <Modal closable
+          maskClosable={false}
+          width="50%"
+          title={info.name ? `Exchange - ${info.name}` : 'New Exchange'}
+          visible={infoModalShow}
+          footer=""
+          onCancel={handleInfoCancel}
         >
-          <FormItem
-            {...formItemLayout}
-            label="Name"
-            name="name"
-            rules={[{ required: true }]}
-            initialValue={info.name}
+          <Form
+            form={form}
+            horizontal
           >
-            <Input />
-          </FormItem>
-          <React.Suspense fallback={<div>加载中……</div>}>
+            <FormItem
+              {...formItemLayout}
+              label="Name"
+              name="name"
+              rules={[{ required: true }]}
+              initialValue={info.name}
+            >
+              <Input />
+            </FormItem>
             <FormItem
               {...formItemLayout}
               label="Type"
@@ -165,39 +160,39 @@ export default function Exchange() {
               </Select>
 
             </FormItem>
-          </React.Suspense>
-          <FormItem
-            {...formItemLayout}
-            label="AccessKey"
-            name="accessKey"
-            rules={[{ required: true }]}
-            initialValue={info.accessKey}
-          >
-            <Input />
-          </FormItem>
-          <FormItem
-            {...formItemLayout}
-            label="SecretKey"
-            name="secretKey"
-            rules={[{ required: true }]}
-            initialValue={info.secretKey}
-          >
-            <Input />
-          </FormItem>
-          <FormItem
-            {...formItemLayout}
-            label="passphrase"
-            name="passphrase"
-            rules={[{ required: true }]}
-            initialValue={info.passphrase}
-          >
-            <Input />
-          </FormItem>
-          <Form.Item wrapperCol={{ span: 12, offset: 7 }} style={{ marginTop: 24 }}>
-            <Button type="primary" htmlType="submit" onClick={handleInfoSubmit}>Submit</Button>
-          </Form.Item>
-        </Form>
-      </Modal>
+            <FormItem
+              {...formItemLayout}
+              label="AccessKey"
+              name="accessKey"
+              rules={[{ required: true }]}
+              initialValue={info.accessKey}
+            >
+              <Input />
+            </FormItem>
+            <FormItem
+              {...formItemLayout}
+              label="SecretKey"
+              name="secretKey"
+              rules={[{ required: true }]}
+              initialValue={info.secretKey}
+            >
+              <Input />
+            </FormItem>
+            <FormItem
+              {...formItemLayout}
+              label="passphrase"
+              name="passphrase"
+              rules={[{ required: true }]}
+              initialValue={info.passphrase}
+            >
+              <Input />
+            </FormItem>
+            <Form.Item wrapperCol={{ span: 12, offset: 7 }} style={{ marginTop: 24 }}>
+              <Button type="primary" htmlType="submit" onClick={handleInfoSubmit}>Submit</Button>
+            </Form.Item>
+          </Form>
+        </Modal>
+      </React.Suspense>
     </div >
   );
 }
