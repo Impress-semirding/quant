@@ -1,18 +1,14 @@
 import rpcRequest from '../utils/rpc';
 import { IResp } from './types';
 
-interface ILogin {
-    funcName: string,
-    exchangeType: string,
-    period: string,
+interface ILoginParams {
+    cluster: string,
+    username: string,
+    password: string,
 }
 
 
-type ILoginResp = {
-
-}
-
-type ILoginRespFunc = (size: number, page: number) => Promise<ILoginResp>
+type ILoginRespFunc = (username: string, password: string) => Promise<string>
 
 async function login(username: string, password: string) {
     const userLogin = rpcRequest<ILoginRespFunc>("User", "Login", false);
@@ -25,5 +21,6 @@ export {
 }
 
 export type {
-    ILoginResp
+    ILoginResp,
+    ILoginParams
 }

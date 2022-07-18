@@ -2,18 +2,17 @@ import Icon from '@ant-design/icons';
 import { useNavigate } from "react-router-dom";
 import { Button, Form, Input, Tooltip } from 'antd';
 
-import { login, ILoginResp } from '../../actions/login';
-import styles from './index.module.scss'
+import { login, ILoginParams } from '../../actions/login';
+import styles from './index.module.scss';
 
 export default function Login() {
   let navigate = useNavigate();
   const cluster = localStorage.getItem('cluster') || document.URL.slice(0, -6);
-  const onFinish = async (values) => {
-    console.log(values)
+  const onFinish = async (values: ILoginParams) => {
     const token = await login(values.username, values.password)
     localStorage.setItem('cluster', values.cluster);
     localStorage.setItem('token', token);
-    navigate("../quote", { replace: true });
+    navigate("/quote");
   }
   return (
     <div>
@@ -25,7 +24,6 @@ export default function Login() {
       <div className={styles.formContainer}>
         <Form
           onFinish={onFinish}
-        // onSubmit={this.handleSubmit}
         >
           <Tooltip placement="right" title="Cluster URL">
             <Form.Item

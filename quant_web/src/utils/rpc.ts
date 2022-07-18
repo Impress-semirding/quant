@@ -2,7 +2,7 @@
 import { Client } from 'hprose-js';
 import { message } from 'antd';
 
-type RPCRequest = <T extends (...args: any[]) => Promise<any>>(funcName: string, type: string) => (...args: Parameters<T>) => Promise<ReturnType<T>>;
+type RPCRequest = <T extends (...args: any[]) => Promise<any>>(funcName: string, type: string, withToken?: boolean) => (...args: Parameters<T>) => Promise<ReturnType<T>>;
 
 const rpcReques: RPCRequest = (funcName: string, type: string, withToken?: boolean) => {
   const token = localStorage.getItem('token');
