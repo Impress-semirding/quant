@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 	"net/url"
 	"time"
@@ -28,6 +29,8 @@ type OKEX struct {
 	lastSleep int64
 	lastTimes int64
 	*okex.OKExV5
+	*okex.OKExV5Swap
+	*okex.OKExV5Spot
 }
 
 func NewOKEX(opt interface{}) Exchange {
@@ -44,7 +47,9 @@ func NewOKEX(opt interface{}) Exchange {
 		}
 	}
 	config.HttpClient = &http.Client{}
-	apiClient := okex.NewOKExV5(&config)
+	v5 := okex.NewOKExV5(&config)
+	v5Swap := okex.NewOKExV5Swap(&config)
+	v5Spot := okex.NewOKExV5Spot(&config)
 
 	return &OKEX{
 		stockTypeMap: map[string]string{
@@ -77,10 +82,12 @@ func NewOKEX(opt interface{}) Exchange {
 			"QTUM/USDT": 0.001,
 			"ONT/ETH":   0.001,
 		},
-		records:   make(map[string][]Record),
-		limit:     10.0,
-		lastSleep: time.Now().UnixNano(),
-		OKExV5:    apiClient,
+		records:    make(map[string][]Record),
+		limit:      10.0,
+		lastSleep:  time.Now().UnixNano(),
+		OKExV5:     v5,
+		OKExV5Swap: v5Swap,
+		OKExV5Spot: v5Spot,
 	}
 }
 
@@ -199,15 +206,30 @@ func (o *OKEX) GetDepth(size int, currency goex.CurrencyPair) (*goex.Depth, erro
 	return nil, nil
 }
 
-func (o *OKEX) GetKlineRecords(currency goex.CurrencyPair, period goex.KlinePeriod, size int, optional ...goex.OptionalParameter) ([]goex.Kline, error) {
+func (o *OKEX) GetKlineRecords(instId string, period goex.KlinePeriod, size int, optional ...goex.OptionalParameter) ([]goex.Kline, error) {
+	currency, contractType, err := getSymbols(instId)
+
+	if err != nil {
+		return nil, nil
+	}
+
 	options := map[string]interface{}{
 		"limit": size,
 	}
-	data := o.GetKline(currency.CurrencyA.Symbol+"-"+currency.CurrencyB.Symbol, int(period), options)
-	if len(data) > 0 {
-		return data, nil
+
+	//	空是现货，不为空，是期货或者
+	var data []goex.Kline
+	if contractType != "" {
+		data, err = o.GetKlineFuture(contractType, currency, period, size, options)
+	} else {
+		data, err = o.GetKline(currency.CurrencyA.Symbol+"-"+currency.CurrencyB.Symbol, int(period), options)
 	}
-	return nil, nil
+
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }
 
 //非个人，整个交易所的交易记录
@@ -235,20 +257,39 @@ func (o *OKEX) GetUnfinishOrders(currency goex.CurrencyPair) ([]goex.Order, erro
 	return nil, nil
 }
 
-func (o *OKEX) LimitBuy(amount, price string, currency goex.CurrencyPair, opt ...goex.LimitOrderOptionalParameter) (*goex.Order, error) {
+func (o *OKEX) LimitBuy(instId string, amount, price string, opt ...goex.LimitOrderOptionalParameter) (*goex.Order, error) {
+
+	currency, contractType, err := getSymbols(instId)
+
+	if err != nil {
+		return nil, nil
+	}
+
 	tdMode := "cross"
 	side := "buy"
 	ordType := "limit"
+
 	params := &okex.CreateOrderParam{
 		Size:      amount,
 		Price:     price,
-		Symbol:    currency.CurrencyA.Symbol + "-" + currency.CurrencyB.Symbol,
+		Symbol:    instId,
 		TradeMode: tdMode,
 		Side:      side,
 		OrderType: ordType,
-		CCY:       "USDT",
+	}
+
+	if currency.CurrencyB.Symbol == "USDT" && contractType == "" {
+		params.CCY = "USDT"
+	}
+
+	if contractType != "" {
+		params.PosSide = "long"
 	}
 	resp, err := o.CreateOrder(params)
+
+	if resp == nil {
+		return nil, err
+	}
 
 	if resp.SCode == "0" {
 		order := &goex.Order{
@@ -300,10 +341,10 @@ func (e *OKEX) GetInstIdTicker(instId string) interface{} {
 	return data
 }
 
-func (e *OKEX) GetKline(instId string, period int, options ...utils.OptionalParameter) []goex.Kline {
+func (e *OKEX) GetKline(instId string, period int, options ...utils.OptionalParameter) ([]goex.Kline, error) {
 	if _, ok := e.stockTypeMap[instId]; !ok {
 		e.Log("error instId not in stockTypeMap")
-		return nil
+		return nil, errors.New("error instId not in stockTypeMap")
 	}
 
 	e.updateLastTime()
@@ -313,7 +354,7 @@ func (e *OKEX) GetKline(instId string, period int, options ...utils.OptionalPara
 	tickets, err := e.OKExV5.GetKlineRecordsV5(instId, goex.KlinePeriod(period), param)
 	if err != nil {
 		e.Log("error", err)
-		return nil
+		return nil, err
 	}
 
 	recordsNew := []goex.Kline{}
@@ -328,5 +369,27 @@ func (e *OKEX) GetKline(instId string, period int, options ...utils.OptionalPara
 		}}, recordsNew...)
 	}
 
-	return recordsNew
+	return recordsNew, nil
+}
+
+func (e *OKEX) GetKlineFuture(contractType string, currency goex.CurrencyPair, period goex.KlinePeriod, size int, options ...goex.OptionalParameter) ([]goex.Kline, error) {
+	data, err := e.OKExV5Swap.GetKlineRecords(contractType, currency, period, size, options...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	recordsNew := []goex.Kline{}
+	for _, v := range data {
+		recordsNew = append([]goex.Kline{{
+			Timestamp: conver.Int64Must(v.Timestamp),
+			Open:      conver.Float64Must(v.Open),
+			High:      conver.Float64Must(v.High),
+			Low:       conver.Float64Must(v.Low),
+			Close:     conver.Float64Must(v.Close),
+			Vol:       conver.Float64Must(v.Vol),
+		}}, recordsNew...)
+	}
+
+	return recordsNew, nil
 }

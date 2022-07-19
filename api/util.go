@@ -9,14 +9,15 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	encodingJson "encoding/json"
+	"errors"
 	"fmt"
+	"github.com/bitly/go-simplejson"
+	"github.com/miaolz123/conver"
+	"github.com/nntaoli-project/goex"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
-
-	"github.com/bitly/go-simplejson"
-	"github.com/miaolz123/conver"
 )
 
 // var client = http.DefaultClient
@@ -239,4 +240,22 @@ func get(url string) (ret []byte, err error) {
 
 func getFloatValueFromJsonObject(json *simplejson.Json, key string) float64 {
 	return conver.Float64Must(json.Get(key).MustString())
+}
+
+func getSymbols(instId string) (symbol goex.CurrencyPair, types string, err error) {
+	symbols := strings.Split(instId, "-")
+	if len(symbols) < 2 {
+		return symbol, "", errors.New("instId非法")
+	}
+
+	contractType := ""
+
+	if len(symbols) >= 3 {
+		contractType = symbols[2]
+	}
+
+	fr := goex.Currency{symbols[0], ""}
+	to := goex.Currency{symbols[1], ""}
+	currency := goex.CurrencyPair{CurrencyA: fr, CurrencyB: to, AmountTickSize: 1, PriceTickSize: 1}
+	return currency, contractType, nil
 }

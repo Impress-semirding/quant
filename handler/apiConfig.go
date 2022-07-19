@@ -150,7 +150,7 @@ func runTask(task *taskLib.Task) {
 			if maker, ok := trader.ExchangeMaker[taskConfig.ExchangeType]; ok {
 				client := maker(nil)
 				fmt.Println("start taskConfig.Period", taskConfig.Period)
-				data, err := client.GetKlineRecords(instIdMaps[taskConfig.InstId], goex.KlinePeriod(taskConfig.Period), 100)
+				data, err := client.GetKlineRecords("BTC-USDT", goex.KlinePeriod(taskConfig.Period), 100)
 				if err == nil {
 					fmt.Println("end taskConfig.Period", taskConfig.Period)
 					task.Pub(data)

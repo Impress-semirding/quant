@@ -6,7 +6,6 @@ import (
 	"github.com/miaolz123/conver"
 	"github.com/nntaoli-project/goex"
 	"github.com/nntaoli-project/goex/binance"
-	"net/http"
 	"time"
 )
 
@@ -27,60 +26,61 @@ type Binance struct {
 	*binance.Binance
 }
 
-func NewBinance(opt interface{}) Exchange {
-	setProxy()
-
-	config := goex.APIConfig{Endpoint: "https://api.binance.com"}
-
-	if v, ok := opt.(Option); ok {
-		config = goex.APIConfig{
-			Endpoint:      "https://api.binance.com",
-			ApiKey:        v.AccessKey,
-			ApiSecretKey:  v.SecretKey,
-			ApiPassphrase: v.Passphrase,
-		}
-	}
-	config.HttpClient = &http.Client{}
-
-	apiClient := binance.NewWithConfig(&config)
-
-	return &Binance{
-		stockTypeMap: map[string]string{
-			"BTC-USDT":      "BTC-USDT",
-			"ETH-USDT":      "ETH-USDT",
-			"BTC-USD-SWAP":  "BTC-USD-SWAP",
-			"BTC-USDT-SWAP": "BTC-USDT-SWAP",
-		},
-		tradeTypeMap: map[string]string{
-			"buy":         constant.TradeTypeBuy,
-			"sell":        constant.TradeTypeSell,
-			"buy_market":  constant.TradeTypeBuy,
-			"sell_market": constant.TradeTypeSell,
-		},
-		recordsPeriodMap: map[string]string{
-			"M":   "1m",
-			"M5":  "5m",
-			"M15": "15m",
-			"M30": "30m",
-			"H":   "1H",
-			"H4":  "4H",
-			"D":   "1D",
-			"W":   "1W",
-		},
-		minAmountMap: map[string]float64{
-			"BTC/USDT":  0.001,
-			"ETH/USDT":  0.001,
-			"EOS/USDT":  0.001,
-			"ONT/USDT":  0.001,
-			"QTUM/USDT": 0.001,
-			"ONT/ETH":   0.001,
-		},
-		records:   make(map[string][]Record),
-		limit:     10.0,
-		lastSleep: time.Now().UnixNano(),
-		Binance:   apiClient,
-	}
-}
+//
+//func NewBinance(opt interface{}) Exchange {
+//	setProxy()
+//
+//	config := goex.APIConfig{Endpoint: "https://api.binance.com"}
+//
+//	if v, ok := opt.(Option); ok {
+//		config = goex.APIConfig{
+//			Endpoint:      "https://api.binance.com",
+//			ApiKey:        v.AccessKey,
+//			ApiSecretKey:  v.SecretKey,
+//			ApiPassphrase: v.Passphrase,
+//		}
+//	}
+//	config.HttpClient = &http.Client{}
+//
+//	apiClient := binance.NewWithConfig(&config)
+//
+//	return &Binance{
+//		stockTypeMap: map[string]string{
+//			"BTC-USDT":      "BTC-USDT",
+//			"ETH-USDT":      "ETH-USDT",
+//			"BTC-USD-SWAP":  "BTC-USD-SWAP",
+//			"BTC-USDT-SWAP": "BTC-USDT-SWAP",
+//		},
+//		tradeTypeMap: map[string]string{
+//			"buy":         constant.TradeTypeBuy,
+//			"sell":        constant.TradeTypeSell,
+//			"buy_market":  constant.TradeTypeBuy,
+//			"sell_market": constant.TradeTypeSell,
+//		},
+//		recordsPeriodMap: map[string]string{
+//			"M":   "1m",
+//			"M5":  "5m",
+//			"M15": "15m",
+//			"M30": "30m",
+//			"H":   "1H",
+//			"H4":  "4H",
+//			"D":   "1D",
+//			"W":   "1W",
+//		},
+//		minAmountMap: map[string]float64{
+//			"BTC/USDT":  0.001,
+//			"ETH/USDT":  0.001,
+//			"EOS/USDT":  0.001,
+//			"ONT/USDT":  0.001,
+//			"QTUM/USDT": 0.001,
+//			"ONT/ETH":   0.001,
+//		},
+//		records:   make(map[string][]Record),
+//		limit:     10.0,
+//		lastSleep: time.Now().UnixNano(),
+//		Binance:   apiClient,
+//	}
+//}
 
 // Log print something to console
 func (e *Binance) Log(msgs ...interface{}) {
