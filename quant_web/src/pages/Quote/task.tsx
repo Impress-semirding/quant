@@ -81,6 +81,9 @@ const TaskCreateForm: React.FC<CreateFormProps> = ({
         >
           <Select placeholder="请选择交易商品">
             <Option value="BTC-USDT">BTC-USDT</Option>
+            <Option value="BTC-USDT-SWAP">BTC-USDT-SWAP</Option>
+            <Option value="BTC-USDT-SPOT">BTC-USDT-SPOT</Option>
+            <Option value="BTC-USDT-FUTURES">BTC-USDT-FUTURES</Option>
             <Option value="ETH-USDT">ETH-USDT</Option>
           </Select>
         </Form.Item>

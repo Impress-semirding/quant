@@ -312,8 +312,58 @@ func (o *OKEX) LimitBuy(instId string, amount, price string, opt ...goex.LimitOr
 	return nil, err
 }
 
-func (o *OKEX) LimitSell(amount, price string, currency goex.CurrencyPair, opt ...goex.LimitOrderOptionalParameter) (*goex.Order, error) {
-	return nil, nil
+func (o *OKEX) LimitSell(instId string, amount, price string, opt ...goex.LimitOrderOptionalParameter) (*goex.Order, error) {
+	currency, contractType, err := getSymbols(instId)
+
+	if err != nil {
+		return nil, nil
+	}
+
+	tdMode := "cross"
+	side := "sell"
+	ordType := "limit"
+
+	params := &okex.CreateOrderParam{
+		Size:      amount,
+		Price:     price,
+		Symbol:    instId,
+		TradeMode: tdMode,
+		Side:      side,
+		OrderType: ordType,
+	}
+
+	if currency.CurrencyB.Symbol == "USDT" && contractType == "" {
+		params.CCY = "USDT"
+	}
+
+	if contractType != "" {
+		params.PosSide = "short"
+	}
+	resp, err := o.CreateOrder(params)
+
+	if resp == nil {
+		return nil, err
+	}
+
+	if resp.SCode == "0" {
+		order := &goex.Order{
+			Price:    conver.Float64Must(price),
+			Amount:   conver.Float64Must(amount),
+			AvgPrice: conver.Float64Must(price),
+			Cid:      resp.ClientOrdId,
+			OrderID2: resp.OrdId,
+			//Status       : "ok",
+			Currency: currency,
+			//Side:      side,
+			Type:      "sell",
+			OrderType: 1,
+			//OrderTime    :
+			//FinishedTime int64
+		}
+		return order, nil
+	}
+
+	return nil, err
 }
 
 func (o *OKEX) MarketBuy(amount, price string, currency goex.CurrencyPair) (*goex.Order, error) {
