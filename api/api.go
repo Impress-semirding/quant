@@ -18,8 +18,8 @@ type Option struct {
 // Exchange interface
 type Exchange interface {
 	GetKlineRecords(instId string, period goex.KlinePeriod, size int, optional ...goex.OptionalParameter) ([]goex.Kline, error)
-	LimitBuy(instId string, amount, price string, opt ...goex.LimitOrderOptionalParameter) (*goex.Order, error)
-	LimitSell(instId string, amount, price string, opt ...goex.LimitOrderOptionalParameter) (*goex.Order, error)
+	LimitBuy(instId string, amount, price string, optional ...goex.OptionalParameter) (*goex.Order, error)
+	LimitSell(instId string, amount, price string, optional ...goex.OptionalParameter) (*goex.Order, error)
 	//gx	goex.API
 	Log(...interface{})
 	GetType() string

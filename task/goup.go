@@ -21,7 +21,8 @@ func RunGroupTask(ids []int64, id int64, f func(data []interface{})) {
 		}
 
 		if size == len(queue) {
-			go f(queue)
+			//	同步执行订阅任务，保证不会同时发送下单，平单等
+			f(queue)
 			queue = []interface{}{}
 		}
 	}

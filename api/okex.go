@@ -257,7 +257,7 @@ func (o *OKEX) GetUnfinishOrders(currency goex.CurrencyPair) ([]goex.Order, erro
 	return nil, nil
 }
 
-func (o *OKEX) LimitBuy(instId string, amount, price string, opt ...goex.LimitOrderOptionalParameter) (*goex.Order, error) {
+func (o *OKEX) LimitBuy(instId string, amount, price string, optional ...goex.OptionalParameter) (*goex.Order, error) {
 
 	currency, contractType, err := getSymbols(instId)
 
@@ -268,6 +268,7 @@ func (o *OKEX) LimitBuy(instId string, amount, price string, opt ...goex.LimitOr
 	tdMode := "cross"
 	side := "buy"
 	ordType := "limit"
+	posSide := "long"
 
 	params := &okex.CreateOrderParam{
 		Size:      amount,
@@ -276,15 +277,22 @@ func (o *OKEX) LimitBuy(instId string, amount, price string, opt ...goex.LimitOr
 		TradeMode: tdMode,
 		Side:      side,
 		OrderType: ordType,
+		PosSide:   posSide,
 	}
 
 	if currency.CurrencyB.Symbol == "USDT" && contractType == "" {
 		params.CCY = "USDT"
 	}
 
-	if contractType != "" {
-		params.PosSide = "long"
+	option := goex.OptionalParameter{}
+	if len(optional) > 0 {
+		option = optional[0]
 	}
+
+	if option["posSide"] != nil {
+		params.PosSide = conver.StringMust(option["posSide"])
+	}
+
 	resp, err := o.CreateOrder(params)
 
 	if resp == nil {
@@ -312,7 +320,7 @@ func (o *OKEX) LimitBuy(instId string, amount, price string, opt ...goex.LimitOr
 	return nil, err
 }
 
-func (o *OKEX) LimitSell(instId string, amount, price string, opt ...goex.LimitOrderOptionalParameter) (*goex.Order, error) {
+func (o *OKEX) LimitSell(instId string, amount, price string, optional ...goex.OptionalParameter) (*goex.Order, error) {
 	currency, contractType, err := getSymbols(instId)
 
 	if err != nil {
@@ -322,6 +330,7 @@ func (o *OKEX) LimitSell(instId string, amount, price string, opt ...goex.LimitO
 	tdMode := "cross"
 	side := "sell"
 	ordType := "limit"
+	posSide := "short"
 
 	params := &okex.CreateOrderParam{
 		Size:      amount,
@@ -330,15 +339,22 @@ func (o *OKEX) LimitSell(instId string, amount, price string, opt ...goex.LimitO
 		TradeMode: tdMode,
 		Side:      side,
 		OrderType: ordType,
+		PosSide:   posSide,
 	}
 
 	if currency.CurrencyB.Symbol == "USDT" && contractType == "" {
 		params.CCY = "USDT"
 	}
 
-	if contractType != "" {
-		params.PosSide = "short"
+	option := goex.OptionalParameter{}
+	if len(optional) > 0 {
+		option = optional[0]
 	}
+
+	if option["posSide"] != nil {
+		params.PosSide = conver.StringMust(option["posSide"])
+	}
+
 	resp, err := o.CreateOrder(params)
 
 	if resp == nil {
