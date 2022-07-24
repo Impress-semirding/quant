@@ -1,37 +1,29 @@
-
+import React from 'react';
 import rpcRequest from '../utils/rpc';
-import { IResp } from './types';
-
-type ISaveResp = {
-
-}
+import { IExchangeTypes, IExchange, IExchangeList } from '../types';
 
 
-
-
-
-type IExchangeListFunc = (size: number, page: number) => Promise<IListResp>
-
+type IExchangeListFunc = (size: number, page: number) => Promise<IExchangeList>
 
 async function exchangeTypes() {
-  const getExchangeTypes = rpcRequest<IExchangeListFunc>("Exchange", "Types", true);
+  const getExchangeTypes = rpcRequest<() => Promise<IExchangeTypes>>("Exchange", "Types", true);
   const res = await getExchangeTypes()
   return res;
 }
 
-async function ExchangePut(req) {
-  const saveExchange = rpcRequest<IExchangeListFunc>("Exchange", "Put", true);
+async function ExchangePut(req: IExchange) {
+  const saveExchange = rpcRequest<(req: IExchange) => Promise<IExchange>>("Exchange", "Put", true);
   const res = await saveExchange(req)
   return res;
 }
 
-async function ExchangeDelete(req) {
-  const deleteExchange = rpcRequest<IExchangeListFunc>("Exchange", "Delete", true);
-  const res = await deleteExchange(req)
+async function ExchangeDelete(ids: React.Key[]) {
+  const deleteExchange = rpcRequest<(ids: React.Key[]) => Promise<any>>("Exchange", "Delete", true);
+  const res = await deleteExchange(ids)
   return res;
 }
 
-async function exchangeList(size: number, page: number) {
+async function exchangeList(requestId: number, size: number, page: number) {
   const exchangeList = rpcRequest<IExchangeListFunc>("Exchange", "List", true);
   const res = await exchangeList(size, page)
   return res;
@@ -42,10 +34,6 @@ export {
   exchangeTypes,
   ExchangePut,
   ExchangeDelete
-}
-
-export type {
-  ISaveResp
 }
 
 

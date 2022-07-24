@@ -1,5 +1,6 @@
-import { atom, selector, useRecoilValue, useSetRecoilState, selectorFamily } from 'recoil';
+import { selector, selectorFamily } from 'recoil';
 import { exchangeTypes, exchangeList } from '../actions/exchange';
+import { IExchangeList } from '../types';
 
 const exchangeTypesQuery = selector({
   key: 'exchangeTypes',
@@ -9,12 +10,11 @@ const exchangeTypesQuery = selector({
   },
 });
 
-const listState = atom({ key: 'listState', default: { list: [], total: 0 } });
 
-const exchangeListQuery = selectorFamily({
+const exchangeListQuery = selectorFamily<IExchangeList, { size: number, page: number, requestId: number }>({
   key: 'exchangeList',
-  get: ({ size, page, requestId }) => async ({ get }) => {
-    const data = await exchangeList(size, page);
+  get: ({ size, page, requestId }) => async () => {
+    const data = await exchangeList(requestId, size, page);
     return data
   },
 });
