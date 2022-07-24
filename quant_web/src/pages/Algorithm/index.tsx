@@ -85,7 +85,7 @@ function Algorithm() {
   }
 
   const reload = () => {
-    setRequestId(id => id + 1);
+    setRid(id => id + 1);
   }
 
   const addHandleEdit = () => navigate("/algorithmEdit/add");
