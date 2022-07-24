@@ -1,15 +1,19 @@
-import { useSetRecoilState } from 'recoil';
-import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Badge, Dropdown, Select, Row, Col, Tooltip, Menu, Input, Button, notification, Table, Modal, Form } from 'antd';
-import { algorithmList } from '../../actions/algorithm';
-import { exchangeList } from '../../actions/exchange';
-import { list as apiList } from '../../actions/apiConfig';
+import type { ColumnsType } from 'antd/es/table';
+import React, { useEffect, useState } from "react";
+import { useRecoilState, useSetRecoilState, useRecoilValueLoadable } from 'recoil';
+import { Badge, Dropdown, Select, Menu, Input, Button, Table, Modal, Form } from 'antd';
+
+import apiListQuery from '../../models/api';
+import { traderState } from '../../models';
+import type { IArgorith, ITrader } from '../../types';
+import { exchangeListQuery } from '../../models/exchange';
+import { AlgListQuery, AlgListQueryRequestIDState } from '../../models/alg';
 import { traderSave, traderList, traderDelete, traderSwitch } from '../../actions/trader';
-import { algState, traderState } from '../../models';
 import styles from './index.module.scss';
 
 
+const Option = Select.Option;
 const formItemLayout = {
   labelCol: {
     xs: { span: 24 },
@@ -28,35 +32,37 @@ const periods = {
 }
 
 function Algorithm() {
-  const [data, setData] = useState([]);
-  const [exchanges, setExchanges] = useState([]);
-  const [apis, setApis] = useState([]);
-  const [isTraderVisible, setVisible] = useState(false);
-  const [trader, setTrader] = useState(null);
-  const [traderMap, setTraderMap] = useState({});
-  const setAlg = useSetRecoilState(algState);
-  const setTraderLog = useSetRecoilState(traderState);
-
+  const [form] = Form.useForm();
   const navigate = useNavigate();
-  const onHandleEdit = (r) => {
-    console.log(r);
-    setAlg(r);
-    navigate("/algorithmEdit")
+  const [isTraderVisible, setVisible] = useState(false);
+  const [trader, setTrader] = useState<ITrader>({
+    id: -1,
+    userId: "",
+    algorithmId: "",
+    name: "",
+    status: 0,
+    createdAt: "",
+    updatedAt: "",
+  });
+
+  const apis = useRecoilValueLoadable(apiListQuery);
+  const setTraderLog = useSetRecoilState(traderState);
+  const [traderMap, setTraderMap] = useState<{ [key: string]: [] }>({});
+  const exchanges = useRecoilValueLoadable(exchangeListQuery({ size: 100, page: 1, requestId: 0 }));
+  const [rid, setRid] = useRecoilState(AlgListQueryRequestIDState(0));
+  const data = useRecoilValueLoadable(AlgListQuery({ size: 100, page: 1, requestId: rid }));
+
+
+  const onHandleEdit = (r: IArgorith) => {
+    navigate(`/algorithmEdit/${r.id}`)
   };
-  const onHandleTraderEdit = (record) => {
-    console.log(record)
+
+  const onHandleTraderEdit = (record: any) => {
     setVisible(true);
     setTrader(record)
   };
-  const handleOk = () => {
 
-  }
-
-  const handleCancel = () => {
-
-  }
-
-  const handleTraderDelete = (req) => {
+  const handleTraderDelete = (req: ITrader) => {
     Modal.confirm({
       title: 'Are you sure to delete ?',
       onOk: async () => {
@@ -64,27 +70,29 @@ function Algorithm() {
         const ids = Object.keys(traderMap);
         onExpandedRowsChange(ids);
       },
-      iconType: 'exclamation-circle',
     });
   }
 
-  const handleTraderSwitch = async (req) => {
+  const handleTraderSwitch = async (req: ITrader) => {
     const res = await traderSwitch(req);
     const ids = Object.keys(traderMap);
     await onExpandedRowsChange(ids);
-    // const data = await traderList(ids[i]);
   }
 
-  const handleTraderLog = (info) => {
+  const handleTraderLog = (info: ITrader) => {
     setTraderLog(info);
     navigate(`/traderLog/${info.id}`);
   }
 
-  const reload = () => { }
-  const handleEdit = () => navigate("/algorithmEdit");
+  const reload = () => {
+    setRequestId(id => id + 1);
+  }
+
+  const addHandleEdit = () => navigate("/algorithmEdit/add");
+
   const handleDelete = () => { }
   const selectedRowKeys = []
-  const columns = [{
+  const columns: ColumnsType<IArgorith> = [{
     title: 'Name',
     dataIndex: 'name',
     sorter: true,
@@ -111,7 +119,7 @@ function Algorithm() {
     ),
   }];
 
-  const expcolumns = [{
+  const expcolumns: ColumnsType<ITrader> = [{
     title: 'Name',
     dataIndex: 'name',
     // render: (v, r) => <a onClick={this.handleTraderEdit.bind(this, r, null)}>{v}</a>,
@@ -144,32 +152,7 @@ function Algorithm() {
     ),
   }];
 
-  useEffect(() => {
-    loadList()
-    loadExchanges();
-    loadApi();
-  }, [])
-
-  const loadList = async () => {
-    const { list: data } = await algorithmList(100, 1);
-    setData(data);
-  }
-
-  const loadExchanges = async () => {
-    const { list: data } = await exchangeList(100, 1);
-    setExchanges(data)
-  }
-
-
-  const loadApi = async () => {
-    const { list: data } = await apiList();
-    setApis(data);
-  }
-
-  const [form] = Form.useForm();
-
-
-  const expandedRowRender = (r) => {
+  const expandedRowRender = (r: ITrader) => {
     const data = traderMap[r.id];
 
     if (data && data.length > 0) {
@@ -183,18 +166,10 @@ function Algorithm() {
         />
       );
     }
-
-    if (!trader?.loading) {
-      return (
-        <p>
-          No Trader under this algorithm
-        </p>
-      );
-    }
   };
 
-  const onExpandedRowsChange = async (ids) => {
-    let newMap = {};
+  const onExpandedRowsChange = async (ids: React.Key[]) => {
+    let newMap: { [key: string]: any } = {};
     for (let i = 0; i < ids.length; i++) {
       const data = await traderList(ids[i]);
       newMap[ids[i]] = data;
@@ -210,19 +185,16 @@ function Algorithm() {
     <div>
       <div className={styles.toolbar}>
         <Button type="primary" onClick={reload}>Reload</Button>
-        <Button type="ghost" onClick={handleEdit}>Add</Button>
+        <Button type="ghost" onClick={addHandleEdit}>Add</Button>
         <Button disabled={selectedRowKeys.length <= 0} onClick={handleDelete}>Delete</Button>
       </div>
-      <Table rowKey="id"
+      <Table
+        rowKey="id"
         columns={columns}
         expandedRowRender={expandedRowRender}
         onExpandedRowsChange={onExpandedRowsChange}
-        dataSource={data}
-        // rowSelection={rowSelection}
-        // pagination={pagination}
-        loading={false}
-      // onChange={handleTableChange}
-      // onExpand={handleTableExpand}
+        dataSource={data.state === "hasValue" ? data.contents.list : []}
+        loading={data.state === "loading"}
       />
       <Modal
         visible={isTraderVisible}
@@ -235,8 +207,14 @@ function Algorithm() {
             .validateFields()
             .then(async (values) => {
               form.resetFields();
-              const exs = exchanges?.filter((ex) => values?.exchanges?.includes(ex.id))
-              const fapi = apis.filter(item => values.api.includes(item.id))
+              if (exchanges.state !== "hasValue") {
+                return;
+              }
+              const exs = exchanges.contents.list.filter((ex) => values?.exchanges?.includes(ex.id))
+              if (apis.state !== "hasValue") {
+                return;
+              }
+              const fapi = apis.contents.list.filter(item => values.api.includes(item.id))
               await traderSave({ ...values, api: fapi, algorithmId: trader.id, exchanges: exs })
               setVisible(false)
               onExpandedRowsChange([trader.id])
@@ -260,22 +238,26 @@ function Algorithm() {
           >
             <Input placeholder="请输入名称" />
           </Form.Item>
-          <Form.Item name="api" label="API">
+          <Form.Item
+            name="api"
+            label="API"
+            rules={[{ required: true, message: '请选择api' }]}
+          >
             <Select
               mode="multiple"
               placeholder="请选择行情数据来源"
               allowClear
-              rules={[{ required: true, message: '请选择api' }]}
             >
               {
-                apis.map(item => <Option disabled={item.status !== 'Y'} value={item.id}>{item.exchangeType}-{item.funcName}-{item.instId}-{periods[item.period]}</Option>)
+                apis.state === "hasValue" ?
+                  apis.contents.list.map(item => <Option disabled={item.status !== 'Y'} value={item.id}>{item.exchangeType}-{item.funcName}-{item.instId}-{periods[item.period]}</Option>)
+                  : []
               }
             </Select>
           </Form.Item>
           <Form.Item
             name="exchanges"
             label="Exchanges"
-
           >
             <Select
               mode="multiple"
@@ -283,7 +265,9 @@ function Algorithm() {
               allowClear
             >
               {
-                exchanges.map(item => <Option value={item.id}>{item.name}</Option>)
+                exchanges.state === "hasValue" ?
+                  exchanges.contents.list.map(item => <Option key={item.id} value={item.id}>{item.name}</Option>)
+                  : []
               }
             </Select>
           </Form.Item>

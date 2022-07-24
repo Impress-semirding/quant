@@ -15,7 +15,7 @@ const routes: RouteObject[] = [
     children: [
       { path: "login", element: <Login /> },
       { path: "algorithm", element: <Algorithm /> },
-      { path: "algorithmEdit", element: <AlgorithmEdit /> },
+      { path: "algorithmEdit/:id", element: <AlgorithmEdit /> },
       { path: "traderLog/:id", element: <TraderLog /> },
       { path: "quote", element: <Quote /> },
       { path: "exchange", element: <Exchange /> }

@@ -1,11 +1,11 @@
-import React from 'react'
-import { useRecoilValue } from 'recoil';
-import { useNavigate } from "react-router-dom";
+import { useMemo } from 'react';
 import MonacoEditor from 'react-monaco-editor';
-import { Input, Form, Button, notification, message } from 'antd';
+import { Input, Form, Button, message } from 'antd';
+import { useLocation, useNavigate } from "react-router-dom";
+import { useSetRecoilState, useRecoilValueLoadable } from 'recoil';
 
+import { AlgListQuery, AlgListQueryRequestIDState } from '../../models/alg';
 import { algorithmSave } from '../../actions/algorithm';
-import { algState } from '../../models';
 import './userWorker';
 import styles from './index.module.scss';
 
@@ -24,16 +24,25 @@ const formItemLayout = {
 function AlgorithmEdit() {
   const code = "// your original code...";
   const navigate = useNavigate();
-  const algDetail = useRecoilValue(algState);
+  const location = useLocation();
+  const setRid = useSetRecoilState(AlgListQueryRequestIDState(0));
+  const data = useRecoilValueLoadable(AlgListQuery({ size: 100, page: 1, requestId: 0 }));
+  const currentAlg = useMemo(() => {
+    if (data.state === "hasValue") {
+      return data.contents.list.find(item => `/algorithmEdit/${item.id}` === location.pathname)
+    }
+    return {}
+  }, [data]);
 
-  const onFinish = (values: any) => {
-    const payload = { ...algDetail, ...values }
-    algorithmSave(payload)
+  const onFinish = async (values: any) => {
+    const payload = { ...currentAlg, ...values }
+    setRid(id => id + 1);
+    await algorithmSave(payload)
     message.success("保存策略成功")
     navigate("/algorithm");
   };
 
-  const onMonacoChange = (v) => {
+  const onMonacoChange = (v: any) => {
     return v;
   }
 
@@ -41,7 +50,7 @@ function AlgorithmEdit() {
     <div className="container">
       <Form
         {...formItemLayout}
-        initialValues={algDetail}
+        initialValues={currentAlg}
         onFinish={onFinish}
       >
         <div className={styles.toolbar}>

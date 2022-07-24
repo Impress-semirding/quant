@@ -1,5 +1,6 @@
+import React from 'react';
 import rpcRequest from '../utils/rpc';
-import { IResp } from './types';
+import type { ITrader } from '../types';
 
 interface ISaveReq {
   name: string,
@@ -22,7 +23,7 @@ async function traderSave(req: ISaveReq) {
   return res;
 }
 
-async function traderList(id: number) {
+async function traderList(id: React.Key) {
   const traderList = rpcRequest<IAlgorithmSaveFunc>("Trader", "List", true);
   const res = await traderList(id)
   return res;
@@ -34,8 +35,8 @@ async function traderDelete(id: number) {
   return res;
 }
 
-async function traderSwitch(req: ISaveReq) {
-  const runTrader = rpcRequest<IAlgorithmSaveFunc>("Trader", "Switch", true);
+async function traderSwitch(req: ITrader) {
+  const runTrader = rpcRequest<(req: ITrader) => Promise<void>>("Trader", "Switch", true);
   const res = await runTrader(req)
   return res;
 }
@@ -45,8 +46,4 @@ export {
   traderList,
   traderDelete,
   traderSwitch
-}
-
-export type {
-  ILoginResp
 }

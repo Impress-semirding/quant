@@ -1,12 +1,12 @@
 import rpcRequest from '../utils/rpc';
-import { IResp } from './types';
 
 interface IConfigTaskItem {
+  id: number,
+  instId: number,
+  period: 7 | 10 | 14;
   createdAt: Date,
   exchangeType: string,
   funcName: string,
-  id: number,
-  period: number,
   status: string,
   updatedAt: Date,
   userId: number
