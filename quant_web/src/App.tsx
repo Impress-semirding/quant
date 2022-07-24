@@ -1,28 +1,23 @@
+import { Layout, Menu } from "antd";
+import React, { useState } from "react";
 import { useRoutes, Link } from "react-router-dom";
+import {
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  UserOutlined,
+  RiseOutlined,
+  DeliveredProcedureOutlined,
+} from "@ant-design/icons";
 import 'antd/dist/antd.css';
 
 import routes from './routes';
 import './App.css'
-import React, { useState } from "react";
-import { Layout, Menu } from "antd";
-import {
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  UploadOutlined,
-  UserOutlined,
-  RiseOutlined,
-  VideoCameraOutlined,
-  DeliveredProcedureOutlined,
-} from "@ant-design/icons";
 
 const { Header, Sider, Content } = Layout;
 
 function App() {
   const element = useRoutes(routes)
   const [collapsed, setCollapsed] = useState(false);
-
-  const onChangeMenu = ({ item, key, keyPath, domEvent }) => {
-  }
 
   return (
     <div className="App">
@@ -47,15 +42,14 @@ function App() {
               {
                 key: 'Exchange',
                 icon: <DeliveredProcedureOutlined />,
-                label: <Link to="/Exchange">交易所秘钥</Link>
+                label: <Link to="/exchange">交易所秘钥</Link>
               },
               {
                 key: 'Login',
                 icon: <UserOutlined />,
-                label: <Link to="/login">Login</Link>
+                label: <Link to="/login">个人中心</Link>
               },
             ]}
-            onClick={onChangeMenu}
           />
         </Sider>
         <Layout className="site-layout">

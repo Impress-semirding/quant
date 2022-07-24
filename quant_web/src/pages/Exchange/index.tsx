@@ -1,11 +1,11 @@
-import React, { SetStateAction, useEffect, useState, } from 'react';
+import React, { useEffect, useState, } from 'react';
 import { useRecoilValueLoadable } from 'recoil';
 import type { ColumnsType, TableProps } from 'antd/es/table';
 import type { TableRowSelection } from 'antd/es/table/interface';
 import { Button, Table, Modal, Form, Input, Select, notification } from 'antd';
 import { ExchangePut, ExchangeDelete } from '../../actions/exchange';
 import exchangeTypesQuery, { exchangeListQuery } from '../../models/exchange'
-import { IExchange } from '../../types';
+import type { IExchange } from '../../types';
 import styles from './index.module.scss';
 
 const FormItem = Form.Item;

@@ -1,26 +1,48 @@
 import Icon from '@ant-design/icons';
 import { useNavigate } from "react-router-dom";
-import { Button, Form, Input, Tooltip } from 'antd';
+import { useRecoilState, useRecoilValueLoadable } from 'recoil';
+import { Button, Form, Input, Tooltip, Skeleton, Result } from 'antd';
 
-import { login, ILoginParams } from '../../actions/login';
+import { login } from '../../actions/user';
+import type { ILoginParams } from '../../types';
+import userDetailQuery, { userInfoQueryRequestIDState } from '../../models/user';
 import styles from './index.module.scss';
 
+const cluster = localStorage.getItem('cluster') || document.URL.slice(0, -6);
+
 export default function Login() {
-  let navigate = useNavigate();
-  const cluster = localStorage.getItem('cluster') || document.URL.slice(0, -6);
+  const navigate = useNavigate();
+  const [rid, setRid] = useRecoilState(userInfoQueryRequestIDState(0));
+  const userInfo = useRecoilValueLoadable(userDetailQuery(rid));
+
   const onFinish = async (values: ILoginParams) => {
     const token = await login(values.username, values.password)
     localStorage.setItem('cluster', values.cluster);
     localStorage.setItem('token', token);
+    setRid(id => id + 1);
     navigate("/quote");
   }
+
+  if (userInfo.state === "loading") {
+    return <Skeleton />
+  }
+
+  if (userInfo.contents.id) {
+    return (
+      <Result
+        status="success"
+        title={`${userInfo.contents.username}您好`}
+      />
+    )
+  }
+
   return (
     <div>
       <h1 style={{
         padding: 24,
         fontSize: '30px',
         textAlign: 'center',
-      }}>QuantBot</h1>
+      }}>Quant</h1>
       <div className={styles.formContainer}>
         <Form
           onFinish={onFinish}
