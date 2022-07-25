@@ -81,7 +81,7 @@ export default function UserList() {
   }
 
   const onHandleInfoShow = () => {
-    
+
   }
 
   const onHandleTableChange = () => {
@@ -144,28 +144,29 @@ export default function UserList() {
           <FormItem
           >
             {({ getFieldValue }) => {
-                const repasswdRules = info.id && !getFieldValue('password') ?
+              const repasswdRules = info.id && !getFieldValue('password') ?
                 [
                   { required: false, whitespace: true },
                   { validator: checkPassword.bind(null, getFieldValue) },
                 ]
-              :
+                :
                 [
                   { required: true, whitespace: true },
                   { validator: checkPassword.bind(null, getFieldValue) },
                 ];
 
-                return (
-                  <Form.Item
-                    label="Repeat"
-                    name="rePassword"
-                    rules={repasswdRules}
-                  >
+              return (
+                <Form.Item
+                  label="Repeat"
+                  name="rePassword"
+                  rules={repasswdRules}
+                >
                   <Input type="Password" />
                 </Form.Item>
-                )}
+              )
             }
-            
+            }
+
           </FormItem>
           <Form.Item wrapperCol={{ span: 12, offset: 7 }} style={{ marginTop: 24 }}>
             <Button type="primary" onClick={onHandleInfoSubmit} loading={user.loading}>Submit</Button>

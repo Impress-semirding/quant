@@ -102,7 +102,6 @@ func initialize(id int64) (trader Global, err error) {
 	return
 }
 
-// run ...
 func run(id int64, apis []model.ApiConfig) (err error) {
 	trader, err := initialize(id)
 	if err != nil {
@@ -147,17 +146,10 @@ func run(id int64, apis []model.ApiConfig) (err error) {
 	return
 }
 
-//recordsNew := []Record{}
-//for _, v := range tickets {
-//recordsNew = append([]Record{{
-//Time:   conver.Int64Must(v[0]),
-//Open:   conver.Float64Must(v[1]),
-//High:   conver.Float64Must(v[2]),
-//Low:    conver.Float64Must(v[3]),
-//Close:  conver.Float64Must(v[4]),
-//Volume: conver.Float64Must(v[5]),
-//}}, recordsNew...)
-//}
+func RunBackTesting(id int64) error {
+	return nil
+}
+
 func runClientSubscribe(trader Global, subscribe otto.Value) func(data []interface{}) {
 	return func(data []interface{}) {
 		//for k, v := range data {
@@ -169,7 +161,6 @@ func runClientSubscribe(trader Global, subscribe otto.Value) func(data []interfa
 	}
 }
 
-// stop ...
 func stop(id int64, apis []model.ApiConfig) (err error) {
 	if t, ok := Executor[id]; !ok || t == nil {
 		return fmt.Errorf("Can not found the Trader")

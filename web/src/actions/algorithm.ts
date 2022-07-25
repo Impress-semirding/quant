@@ -29,6 +29,12 @@ async function algorithmList(size: number, page: number) {
   return res;
 }
 
+async function RunBackTesing(id: number) {
+  const runBackTest = rpcRequest<(id: number) => Promise<void>>("Trader", "BackTesting", true);
+  const res = await runBackTest(id)
+  return res;
+}
+
 export {
   algorithmSave,
   algorithmList

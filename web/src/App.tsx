@@ -6,6 +6,7 @@ import {
   MenuUnfoldOutlined,
   UserOutlined,
   RiseOutlined,
+  EyeInvisibleOutlined,
   DeliveredProcedureOutlined,
 } from "@ant-design/icons";
 import 'antd/dist/antd.css';
@@ -41,7 +42,7 @@ function App() {
               },
               {
                 key: 'Exchange',
-                icon: <DeliveredProcedureOutlined />,
+                icon: <EyeInvisibleOutlined />,
                 label: <Link to="/exchange">交易所秘钥</Link>
               },
               {

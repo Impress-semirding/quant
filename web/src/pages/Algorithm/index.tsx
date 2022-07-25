@@ -62,6 +62,10 @@ function Algorithm() {
     setTrader(record)
   };
 
+  const onHandleBackTesting = (record: any) => {
+    console.log(record)
+  }
+
   const handleTraderDelete = (req: ITrader) => {
     Modal.confirm({
       title: 'Are you sure to delete ?',
@@ -115,7 +119,10 @@ function Algorithm() {
     title: 'Action',
     key: 'action',
     render: (v, r) => (
-      <Button onClick={onHandleTraderEdit.bind(null, r)} type="ghost">Deploy</Button>
+      <React.Fragment>
+        <Button onClick={onHandleTraderEdit.bind(null, r)} type="ghost">Deploy</Button>
+        <Button style={{ marginLeft: 6 }} onClick={onHandleBackTesting.bind(null, r)} type="ghost">BackTesting</Button>
+      </React.Fragment>
     ),
   }];
 

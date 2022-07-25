@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+
 	"github.com/miaolz123/conver"
 
 	"github.com/Impress-semirding/quant/constant"
@@ -126,7 +127,6 @@ func (runner) Delete(id int64, ctx rpc.Context) (resp response) {
 	return
 }
 
-// Switch
 func (runner) Switch(req model.Trader, ctx rpc.Context) (resp response) {
 	username := ctx.GetString("username")
 	if username == "" {
@@ -166,6 +166,28 @@ func (runner) Switch(req model.Trader, ctx rpc.Context) (resp response) {
 	}
 
 	if err := trader.Switch(req.ID, api); err != nil {
+		resp.Message = fmt.Sprint(err)
+		return
+	}
+
+	resp.Success = true
+	return
+}
+
+//	回测
+func (runner) BackTesting(id int64, ctx rpc.Context) (resp response) {
+	username := ctx.GetString("username")
+	if username == "" {
+		resp.Message = constant.ErrAuthorizationError
+		return
+	}
+	_, err := model.GetUser(username)
+	if err != nil {
+		resp.Message = fmt.Sprint(err)
+		return
+	}
+
+	if err := trader.RunBackTesting(id); err != nil {
 		resp.Message = fmt.Sprint(err)
 		return
 	}
