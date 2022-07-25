@@ -59,9 +59,15 @@ func Server() {
 		log.Printf("%16s() spend %s", name, spendInfo)
 		return
 	})
+	fs := http.FileServer(http.Dir("web/dist"))
 	service.AddAllMethods(handler)
 	http.Handle("/api", service)
 	http.Handle("/", http.FileServer(http.Dir("web/dist")))
+	routes := []string{"login", "exchange", "quote", "algorithm"}
+	for _, v := range routes {
+		prefix := "/" + v + "/"
+		http.Handle(prefix, http.StripPrefix(prefix, fs))
+	}
 	fmt.Printf("%v  Version %v\n", constant.Banner, constant.Version)
 	log.Printf("Running at http://localhost:%v\n", port)
 	http.ListenAndServe(":"+port, nil)
