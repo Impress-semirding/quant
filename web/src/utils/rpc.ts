@@ -6,7 +6,7 @@ type RPCRequest = <T extends (...args: any[]) => Promise<any>>(funcName: string,
 
 const rpcReques: RPCRequest = (funcName: string, type: string, withToken?: boolean) => {
   const token = localStorage.getItem('token');
-  const cluster = localStorage.getItem('cluster') || "http://localhost:3000";
+  const cluster = localStorage.getItem('cluster') || "http://localhost:9876";
   const client = Client.create(`${cluster}/api`, { [funcName]: [type] });
   if (withToken) {
     client.setHeader('Authorization', `Bearer ${token}`);
