@@ -2,14 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { Button, Table, Tag, notification } from 'antd';
 import { useRecoilValue } from 'recoil';
 import { useNavigate } from "react-router-dom";
+import type { ColumnsType } from 'antd/es/table';
+
 import { traderState } from '../../models';
 import { logList } from '../../actions/log';
 import styles from './index.module.scss';
 
+import type { ValueKeyOf, ILog } from '../../types';
+
 
 function Log() {
   const navigate = useNavigate();
-  const [data, setData] = useState({
+  const [data, setData] = useState<{ list: ILog[], total: number }>({
     total: 0,
     list: []
   })
@@ -36,12 +40,13 @@ function Log() {
     // dispatch(LogList(trader.cache, pagination, this.filters));
   }
 
-  const handleTableChange = (newPagination, filters) => {
+  const handleTableChange = (newPagination: { current: any; }, filters: any) => {
     const pag = {
       ...pagination,
       current: newPagination.current,
     }
     setFilter(filter)
+    //  @ts-ignore
     setPagination({ pagination: pag });
     reload();
   }
@@ -57,7 +62,7 @@ function Log() {
     'PROFIT': '#4682B4',
     'CANCEL': '#5F9EA0',
   };
-  const columns = [{
+  const columns: ColumnsType<ILog> = [{
     width: 160,
     title: 'Time',
     dataIndex: 'time',
@@ -71,7 +76,7 @@ function Log() {
     width: 100,
     title: 'Type',
     dataIndex: 'type',
-    render: (v) => <Tag color={colors[v] || '#00BFFF'}>{v}</Tag>,
+    render: (v: ValueKeyOf<ILog, "type">) => <Tag color={colors[v] || '#00BFFF'}>{v}</Tag>,
   }, {
     title: 'Price',
     dataIndex: 'price',
@@ -95,6 +100,7 @@ function Log() {
         columns={columns}
         dataSource={data.list}
         pagination={pagination}
+        //  @ts-ignore
         onChange={handleTableChange}
       />
     </div>
@@ -103,11 +109,3 @@ function Log() {
 
 
 export default Log;
-
-// const mapStateToProps = (state) => ({
-//   user: state.user,
-//   trader: state.trader,
-//   log: state.log,
-// });
-
-// const a = connect(mapStateToProps)(Log);

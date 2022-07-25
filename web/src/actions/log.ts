@@ -1,10 +1,9 @@
 import rpcRequest from '../utils/rpc';
-import { IResp } from './types';
+import type { ILog } from '../types';
 
-type ILogListResp = {};
-type IListFunc = (trader, pagination, filters) => Promise<ILogListResp>
+type IListFunc = (trader: any, pagination: any, filters: any) => Promise<{ list: ILog[], total: number }>
 
-async function logList(trader, pagination, filters) {
+async function logList(trader: any, pagination: any, filters: any) {
   const traderLogList = rpcRequest<IListFunc>("Log", "List", true);
   const res = await traderLogList(trader, pagination, filters)
   return res;
@@ -12,8 +11,4 @@ async function logList(trader, pagination, filters) {
 
 export {
   logList,
-}
-
-export type {
-  ILoginResp
 }

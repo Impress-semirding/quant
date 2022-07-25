@@ -1,36 +1,26 @@
 import React from 'react';
 import rpcRequest from '../utils/rpc';
-import type { ITrader } from '../types';
+import type { IArgorithList, IArgorith, ITrader } from '../types';
 
-interface ISaveReq {
-  name: string,
-  description: string,
-  script: string
-}
+type IAlgorithmSaveFunc = (req: IArgorith) => Promise<IArgorith>
+type IAlgorithmList = (id: React.Key) => Promise<{ list: IArgorithList, total: number }>
+type IAlgorithmDelete = (id: React.Key) => Promise<boolean>
 
 
-type ISaveResp = {
-
-}
-
-
-type IAlgorithmSaveFunc = (req: IListReq) => Promise<ISaveResp>
-
-
-async function traderSave(req: ISaveReq) {
+async function traderSave(req: IArgorith) {
   const traderPut = rpcRequest<IAlgorithmSaveFunc>("Trader", "Put", true);
   const res = await traderPut(req)
   return res;
 }
 
 async function traderList(id: React.Key) {
-  const traderList = rpcRequest<IAlgorithmSaveFunc>("Trader", "List", true);
+  const traderList = rpcRequest<IAlgorithmList>("Trader", "List", true);
   const res = await traderList(id)
   return res;
 }
 
 async function traderDelete(id: number) {
-  const traderDel = rpcRequest<IAlgorithmSaveFunc>("Trader", "Delete", true);
+  const traderDel = rpcRequest<IAlgorithmDelete>("Trader", "Delete", true);
   const res = await traderDel(id)
   return res;
 }

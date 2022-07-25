@@ -191,6 +191,7 @@ function Algorithm() {
       <Table
         rowKey="id"
         columns={columns}
+        //  @ts-ignore
         expandedRowRender={expandedRowRender}
         onExpandedRowsChange={onExpandedRowsChange}
         dataSource={data.state === "hasValue" ? data.contents.list : []}

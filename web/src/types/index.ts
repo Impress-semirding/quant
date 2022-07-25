@@ -1,3 +1,5 @@
+import type { ValueOf, ValueKeyOf } from './define';
+
 interface IExchange {
   id?: number,
   name: string,
@@ -69,8 +71,20 @@ type ITrader = {
   updatedAt: string;
 }
 
+type ILog = {
+  time: string;
+  exchangeType: string;
+  type: "INFO" | "ERROR" | "PROFIT" | "CANCEL";
+  price: string;
+  amount: string;
+  message: string;
+}
+
 export type {
+  ValueOf,
+  ValueKeyOf,
   IUser,
+  ILog,
   ILoginParams,
   IApi,
   IApiList,
