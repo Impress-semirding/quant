@@ -6,6 +6,7 @@ import { Badge, Dropdown, Select, Menu, Input, Button, Table, Modal, Form } from
 
 import apiListQuery from '../../models/api';
 import { traderState } from '../../models';
+import { useTrader } from '../../models/trader';
 import type { IArgorith, ITrader } from '../../types';
 import { exchangeListQuery } from '../../models/exchange';
 import { AlgListQuery, AlgListQueryRequestIDState } from '../../models/alg';
@@ -32,6 +33,7 @@ const periods = {
 }
 
 function Algorithm() {
+  const traderIn = useTrader();
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [isTraderVisible, setVisible] = useState(false);
@@ -47,11 +49,9 @@ function Algorithm() {
 
   const apis = useRecoilValueLoadable(apiListQuery);
   const setTraderLog = useSetRecoilState(traderState);
-  const [traderMap, setTraderMap] = useState<{ [key: string]: [] }>({});
-  const exchanges = useRecoilValueLoadable(exchangeListQuery({ size: 100, page: 1, requestId: 0 }));
   const [rid, setRid] = useRecoilState(AlgListQueryRequestIDState(0));
   const data = useRecoilValueLoadable(AlgListQuery({ size: 100, page: 1, requestId: rid }));
-
+  const exchanges = useRecoilValueLoadable(exchangeListQuery({ size: 100, page: 1, requestId: 0 }));
 
   const onHandleEdit = (r: IArgorith) => {
     navigate(`/algorithmEdit/${r.id}`)
@@ -66,21 +66,32 @@ function Algorithm() {
     console.log(record)
   }
 
+  const loadTrader = (id: React.Key) => {
+    traderIn.setIdList(pre => {
+      // { id: React.Key, requestId: number }
+      const ids = pre.map(item => {
+        if (item.id === id) {
+          return { ...item, requestId: item.requestId + 1 };
+        }
+        return item;
+      })
+      return ids;
+    })
+  }
+
   const handleTraderDelete = (req: ITrader) => {
     Modal.confirm({
       title: 'Are you sure to delete ?',
       onOk: async () => {
         await traderDelete(req.id)
-        const ids = Object.keys(traderMap);
-        onExpandedRowsChange(ids);
+        loadTrader(req.algorithmId)
       },
     });
   }
 
   const handleTraderSwitch = async (req: ITrader) => {
     const res = await traderSwitch(req);
-    const ids = Object.keys(traderMap);
-    await onExpandedRowsChange(ids);
+    loadTrader(req.algorithmId)
   }
 
   const handleTraderLog = (info: ITrader) => {
@@ -160,19 +171,18 @@ function Algorithm() {
   }];
 
   const expandedRowRender = (r: ITrader) => {
-    const data = traderMap[r.id];
+    const map = traderIn.traders.state === "hasValue" ? traderIn.traders.contents : {};
+    const data = map[r.id] || [];
 
-    if (data && data.length > 0) {
-      return (
-        <Table className="womende" rowKey="id"
-          size="middle"
-          pagination={false}
-          columns={expcolumns}
-          // loading={trader.loading}
-          dataSource={data}
-        />
-      );
-    }
+    return (
+      <Table className="womende" rowKey="id"
+        size="middle"
+        pagination={false}
+        columns={expcolumns}
+        loading={traderIn.traders.state === "loading"}
+        dataSource={data}
+      />
+    );
   };
 
   const onExpandedRowsChange = async (ids: React.Key[]) => {
@@ -182,10 +192,7 @@ function Algorithm() {
       newMap[ids[i]] = data;
     }
 
-    setTraderMap(pre => ({
-      ...pre,
-      ...newMap,
-    }))
+    traderIn.setIdList(() => ids.map(id => ({ id, requestId: 1 })));
   }
 
   return (
@@ -225,8 +232,7 @@ function Algorithm() {
               const fapi = apis.contents.list.filter(item => values.api.includes(item.id))
               await traderSave({ ...values, api: fapi, algorithmId: trader.id, exchanges: exs })
               setVisible(false)
-              onExpandedRowsChange([trader.id])
-
+              loadTrader(trader.id)
             })
             .catch(info => {
               console.log('Validate Failed:', info);
