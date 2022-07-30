@@ -1,43 +1,51 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useParams, useNavigate } from "react-router-dom";
 import { Button, Table, Tag, notification } from 'antd';
-import { useRecoilValue } from 'recoil';
-import { useNavigate } from "react-router-dom";
 import type { ColumnsType } from 'antd/es/table';
 
-import { traderState } from '../../models';
 import { logList } from '../../actions/log';
 import styles from './index.module.scss';
 
 import type { ValueKeyOf, ILog } from '../../types';
 
+const colors = {
+  'INFO': '#A9A9A9',
+  'ERROR': '#F50F50',
+  'PROFIT': '#4682B4',
+  'CANCEL': '#5F9EA0',
+};
 
 function Log() {
+  let { id: traderId } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [filter, setFilter] = useState({})
   const [data, setData] = useState<{ list: ILog[], total: number }>({
     total: 0,
     list: []
-  })
-  const [filter, setFilter] = useState({})
+  });
+
   const [pagination, setPagination] = useState({
     pageSize: 12,
     current: 1,
     total: 0,
   })
-  const traderLog = useRecoilValue(traderState);
 
   useEffect(() => {
     setFilter({})
-    reload();
+    reload(pagination);
     return () => {
       notification.destroy();
     }
-  }, [])
+  }, []);
 
-  const reload = async () => {
-    const { total, list } = await logList(traderLog, pagination, filter);
-    setData({ total, list })
-    setPagination(pag => ({ ...pag, total }))
-    // dispatch(LogList(trader.cache, pagination, this.filters));
+  const reload = async (pags = pagination) => {
+    if (!traderId) {
+      console.log("traderId is empty")
+      return;
+    }
+    const { total, list } = await logList(traderId, pags, filter);
+    setData({ total, list });
+    setPagination(pag => ({ ...pag, total }));
   }
 
   const handleTableChange = (newPagination: { current: any; }, filters: any) => {
@@ -47,21 +55,14 @@ function Log() {
     }
     setFilter(filter)
     //  @ts-ignore
-    setPagination({ pagination: pag });
-    reload();
+    setPagination(pag);
+    reload(pag);
   }
 
   const handleCancel = () => {
     navigate('/algorithm');
   }
 
-
-  const colors = {
-    'INFO': '#A9A9A9',
-    'ERROR': '#F50F50',
-    'PROFIT': '#4682B4',
-    'CANCEL': '#5F9EA0',
-  };
   const columns: ColumnsType<ILog> = [{
     width: 160,
     title: 'Time',
@@ -89,6 +90,7 @@ function Log() {
     title: 'Message',
     dataIndex: 'message',
   }];
+
 
   return (
     <div>

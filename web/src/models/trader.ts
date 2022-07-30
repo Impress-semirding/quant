@@ -18,17 +18,16 @@ const TraderListQuery = selectorFamily<ITrader[], { id: React.Key; requestId: nu
 const AlgTradersMap = selector({
   key: 'AlgTradersMap',
   get: ({ get }) => {
-    const map: { [key: React.Key]: ITrader[] } = {};
+    const map: { [key: string]: ITrader[] } = {};
     const list = get(AlgIdList);
-    for (const item of list) {
-      const traders = get(TraderListQuery(item))
-      map[item.id] = traders;
-    }
+    list.forEach(item => {
+      map[item.id] = get(TraderListQuery(item));
+    })
 
-    console.log(map)
     return map;
   }
 });
+
 
 function useTrader() {
   const [idList, setIdList] = useRecoilState(AlgIdList);
@@ -37,13 +36,12 @@ function useTrader() {
   return {
     idList,
     setIdList,
-    traders
+    traders,
   }
 }
 
 export {
   useTrader,
-  // useCallback,
   AlgIdList,
   TraderListQuery,
   AlgTradersMap

@@ -21,7 +21,7 @@ type filters struct {
 	ExchangeType []string
 }
 
-func (logger) List(trader model.Trader, pagination pagination, filters filters, ctx rpc.Context) (resp response) {
+func (logger) List(traderId int64, pagination pagination, filters filters, ctx rpc.Context) (resp response) {
 	username := ctx.GetString("username")
 	if username == "" {
 		resp.Message = constant.ErrAuthorizationError
@@ -32,11 +32,11 @@ func (logger) List(trader model.Trader, pagination pagination, filters filters, 
 		resp.Message = fmt.Sprint(err)
 		return
 	}
-	if trader, err = self.GetTrader(trader.ID); err != nil {
+	if _, err := self.GetTrader(traderId); err != nil {
 		resp.Message = fmt.Sprint(err)
 		return
 	}
-	total, logs, err := self.ListLog(trader.ID, pagination.PageSize, pagination.Current)
+	total, logs, err := self.ListLog(traderId, pagination.PageSize, pagination.Current)
 	if err != nil {
 		resp.Message = fmt.Sprint(err)
 		return
