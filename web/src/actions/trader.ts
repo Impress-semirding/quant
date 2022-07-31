@@ -3,7 +3,7 @@ import rpcRequest from '../utils/rpc';
 import type { IArgorithList, IArgorith, ITrader } from '../types';
 
 type IAlgorithmSaveFunc = (req: IArgorith) => Promise<IArgorith>
-type IAlgorithmList = (id: React.Key) => Promise<{ list: IArgorithList, total: number }>
+type IAlgorithmList = (id: React.Key) => Promise<ITrader[]>
 type IAlgorithmDelete = (id: React.Key) => Promise<boolean>
 
 

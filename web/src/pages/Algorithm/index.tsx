@@ -1,15 +1,19 @@
+import { usePreviousDistinct } from 'react-use';
 import { useNavigate } from "react-router-dom";
-import type { ColumnsType } from 'antd/es/table';
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRecoilState, useSetRecoilState, useRecoilValueLoadable } from 'recoil';
-import { Badge, Dropdown, Select, Menu, Input, Button, Table, Modal, Form } from 'antd';
+import { Badge, Dropdown, Select, Menu, Input, Button, Table, Modal, Form, Popconfirm } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
+import type { TableRowSelection } from 'antd/es/table/interface';
 
 import apiListQuery from '../../models/api';
 import { traderState } from '../../models';
+import { useTrader } from '../../models/trader';
 import type { IArgorith, ITrader } from '../../types';
 import { exchangeListQuery } from '../../models/exchange';
 import { AlgListQuery, AlgListQueryRequestIDState } from '../../models/alg';
 import { traderSave, traderList, traderDelete, traderSwitch } from '../../actions/trader';
+import { runBackTesing } from '../../actions/algorithm';
 import styles from './index.module.scss';
 
 
@@ -32,6 +36,8 @@ const periods = {
 }
 
 function Algorithm() {
+  const traderIn = useTrader();
+  const traders = usePreviousDistinct(traderIn.traders, (pre, next) => next.state !== "hasValue")
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [isTraderVisible, setVisible] = useState(false);
@@ -45,13 +51,12 @@ function Algorithm() {
     updatedAt: "",
   });
 
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const apis = useRecoilValueLoadable(apiListQuery);
   const setTraderLog = useSetRecoilState(traderState);
-  const [traderMap, setTraderMap] = useState<{ [key: string]: [] }>({});
-  const exchanges = useRecoilValueLoadable(exchangeListQuery({ size: 100, page: 1, requestId: 0 }));
   const [rid, setRid] = useRecoilState(AlgListQueryRequestIDState(0));
   const data = useRecoilValueLoadable(AlgListQuery({ size: 100, page: 1, requestId: rid }));
-
+  const exchanges = useRecoilValueLoadable(exchangeListQuery({ size: 100, page: 1, requestId: 0 }));
 
   const onHandleEdit = (r: IArgorith) => {
     navigate(`/algorithmEdit/${r.id}`)
@@ -62,8 +67,27 @@ function Algorithm() {
     setTrader(record)
   };
 
-  const onHandleBackTesting = (record: any) => {
-    console.log(record)
+  const onHandleBackTesting = async (record: any) => {
+    const data = await runBackTesing(record.algorithmId)
+    console.log(data)
+  }
+
+  const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
+    console.log('selectedRowKeys changed: ', selectedRowKeys);
+    setSelectedRowKeys(newSelectedRowKeys);
+  };
+
+  const loadTrader = (id: React.Key) => {
+    traderIn.setIdList(pre => {
+      // { id: React.Key, requestId: number }
+      const ids = pre.map(item => {
+        if (item.id === id) {
+          return { ...item, requestId: item.requestId + 1 };
+        }
+        return item;
+      })
+      return ids;
+    })
   }
 
   const handleTraderDelete = (req: ITrader) => {
@@ -71,16 +95,14 @@ function Algorithm() {
       title: 'Are you sure to delete ?',
       onOk: async () => {
         await traderDelete(req.id)
-        const ids = Object.keys(traderMap);
-        onExpandedRowsChange(ids);
+        loadTrader(req.algorithmId)
       },
     });
   }
 
   const handleTraderSwitch = async (req: ITrader) => {
     const res = await traderSwitch(req);
-    const ids = Object.keys(traderMap);
-    await onExpandedRowsChange(ids);
+    loadTrader(req.algorithmId)
   }
 
   const handleTraderLog = (info: ITrader) => {
@@ -95,7 +117,6 @@ function Algorithm() {
   const addHandleEdit = () => navigate("/algorithmEdit/add");
 
   const handleDelete = () => { }
-  const selectedRowKeys = []
   const columns: ColumnsType<IArgorith> = [{
     title: 'Name',
     dataIndex: 'name',
@@ -119,10 +140,7 @@ function Algorithm() {
     title: 'Action',
     key: 'action',
     render: (v, r) => (
-      <React.Fragment>
-        <Button onClick={onHandleTraderEdit.bind(null, r)} type="ghost">Deploy</Button>
-        <Button style={{ marginLeft: 6 }} onClick={onHandleBackTesting.bind(null, r)} type="ghost">BackTesting</Button>
-      </React.Fragment>
+      <Button onClick={onHandleTraderEdit.bind(null, r)} type="ghost">Deploy</Button>
     ),
   }];
 
@@ -146,46 +164,64 @@ function Algorithm() {
     title: 'Action',
     key: 'action',
     render: (v, r) => (
-      <Dropdown.Button type="ghost" onClick={handleTraderSwitch.bind(null, r)} overlay={
-        <Menu>
-          <Menu.Item key="log">
-            <a type="ghost" onClick={handleTraderLog.bind(null, r)}>View Log</a>
-          </Menu.Item>
-          <Menu.Item key="delete">
-            <a type="ghost" onClick={handleTraderDelete.bind(null, r)}>Delete It</a>
-          </Menu.Item>
-        </Menu>
-      }>{r.status > 0 ? 'Stop' : 'Run'}</Dropdown.Button>
+      <React.Fragment>
+        <Dropdown.Button type="ghost" onClick={handleTraderSwitch.bind(null, r)} overlay={
+          <Menu>
+            <Menu.Item key="log">
+              <a type="ghost" onClick={handleTraderLog.bind(null, r)}>View Log</a>
+            </Menu.Item>
+            <Menu.Item key="delete">
+              <a type="ghost" onClick={handleTraderDelete.bind(null, r)}>Delete It</a>
+            </Menu.Item>
+          </Menu>
+        }>{r.status > 0 ? 'Stop' : 'Run'}</Dropdown.Button>
+
+
+        <Popconfirm title="回测任务数据默认只提供binance数据" okText="确定" cancelText="取消" onConfirm={onHandleBackTesting.bind(null, r)}>
+          <Dropdown.Button type="ghost" overlay={
+            <Menu>
+              <Menu.Item key="backTesting">
+                <a type="ghost">backTesting</a>
+              </Menu.Item>
+            </Menu>
+          }>backTesting</Dropdown.Button>
+        </Popconfirm>
+      </React.Fragment>
     ),
   }];
 
-  const expandedRowRender = (r: ITrader) => {
-    const data = traderMap[r.id];
 
-    if (data && data.length > 0) {
-      return (
-        <Table className="womende" rowKey="id"
-          size="middle"
-          pagination={false}
-          columns={expcolumns}
-          // loading={trader.loading}
-          dataSource={data}
-        />
-      );
+  const rowSelection: TableRowSelection<IArgorith> = {
+    selectedRowKeys,
+    onChange: onSelectChange,
+    selections: [
+      Table.SELECTION_ALL,
+      Table.SELECTION_INVERT,
+      Table.SELECTION_NONE,
+    ],
+  };
+
+  const expandedRowRender = (r: ITrader, index: number) => {
+    if (!traders) {
+      return null;
     }
+    const data = traders.contents[r.id];
+
+    return (
+      <Table
+        className="womende"
+        rowKey="id"
+        size="middle"
+        pagination={false}
+        columns={expcolumns}
+        dataSource={data}
+      />
+    );
+
   };
 
   const onExpandedRowsChange = async (ids: React.Key[]) => {
-    let newMap: { [key: string]: any } = {};
-    for (let i = 0; i < ids.length; i++) {
-      const data = await traderList(ids[i]);
-      newMap[ids[i]] = data;
-    }
-
-    setTraderMap(pre => ({
-      ...pre,
-      ...newMap,
-    }))
+    traderIn.setIdList(() => ids.map(id => ({ id, requestId: 1 })));
   }
 
   return (
@@ -198,6 +234,7 @@ function Algorithm() {
       <Table
         rowKey="id"
         columns={columns}
+        rowSelection={rowSelection}
         //  @ts-ignore
         expandedRowRender={expandedRowRender}
         onExpandedRowsChange={onExpandedRowsChange}
@@ -225,8 +262,7 @@ function Algorithm() {
               const fapi = apis.contents.list.filter(item => values.api.includes(item.id))
               await traderSave({ ...values, api: fapi, algorithmId: trader.id, exchanges: exs })
               setVisible(false)
-              onExpandedRowsChange([trader.id])
-
+              loadTrader(trader.id)
             })
             .catch(info => {
               console.log('Validate Failed:', info);
@@ -258,7 +294,7 @@ function Algorithm() {
             >
               {
                 apis.state === "hasValue" ?
-                  apis.contents.list.map(item => <Option disabled={item.status !== 'Y'} value={item.id}>{item.exchangeType}-{item.funcName}-{item.instId}-{periods[item.period]}</Option>)
+                  apis.contents.list.map(item => <Option key={item.id} disabled={item.status !== 'Y'} value={item.id}>{item.exchangeType}-{item.funcName}-{item.instId}-{periods[item.period]}</Option>)
                   : []
               }
             </Select>
