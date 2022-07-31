@@ -95,7 +95,7 @@ function Log() {
   return (
     <div>
       <div className={styles.toolbar}>
-        <Button type="primary" onClick={reload}>Reload</Button>
+        <Button type="primary" onClick={() => reload}>Reload</Button>
         <Button type="ghost" onClick={handleCancel}>Back</Button>
       </div>
       <Table rowKey="id"
