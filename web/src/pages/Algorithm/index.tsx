@@ -2,7 +2,7 @@ import { usePreviousDistinct } from 'react-use';
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useMemo, useState } from "react";
 import { useRecoilState, useSetRecoilState, useRecoilValueLoadable } from 'recoil';
-import { Badge, Dropdown, Select, Menu, Input, Button, Table, Modal, Form } from 'antd';
+import { Badge, Dropdown, Select, Menu, Input, Button, Table, Modal, Form, Popconfirm } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { TableRowSelection } from 'antd/es/table/interface';
 
@@ -13,6 +13,7 @@ import type { IArgorith, ITrader } from '../../types';
 import { exchangeListQuery } from '../../models/exchange';
 import { AlgListQuery, AlgListQueryRequestIDState } from '../../models/alg';
 import { traderSave, traderList, traderDelete, traderSwitch } from '../../actions/trader';
+import { runBackTesing } from '../../actions/algorithm';
 import styles from './index.module.scss';
 
 
@@ -51,7 +52,6 @@ function Algorithm() {
   });
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-
   const apis = useRecoilValueLoadable(apiListQuery);
   const setTraderLog = useSetRecoilState(traderState);
   const [rid, setRid] = useRecoilState(AlgListQueryRequestIDState(0));
@@ -67,8 +67,9 @@ function Algorithm() {
     setTrader(record)
   };
 
-  const onHandleBackTesting = (record: any) => {
-    console.log(record)
+  const onHandleBackTesting = async (record: any) => {
+    const data = await runBackTesing(record.algorithmId)
+    console.log(data)
   }
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
@@ -139,10 +140,7 @@ function Algorithm() {
     title: 'Action',
     key: 'action',
     render: (v, r) => (
-      <React.Fragment>
-        <Button onClick={onHandleTraderEdit.bind(null, r)} type="ghost">Deploy</Button>
-        <Button style={{ marginLeft: 6 }} onClick={onHandleBackTesting.bind(null, r)} type="ghost">BackTesting</Button>
-      </React.Fragment>
+      <Button onClick={onHandleTraderEdit.bind(null, r)} type="ghost">Deploy</Button>
     ),
   }];
 
@@ -166,16 +164,29 @@ function Algorithm() {
     title: 'Action',
     key: 'action',
     render: (v, r) => (
-      <Dropdown.Button type="ghost" onClick={handleTraderSwitch.bind(null, r)} overlay={
-        <Menu>
-          <Menu.Item key="log">
-            <a type="ghost" onClick={handleTraderLog.bind(null, r)}>View Log</a>
-          </Menu.Item>
-          <Menu.Item key="delete">
-            <a type="ghost" onClick={handleTraderDelete.bind(null, r)}>Delete It</a>
-          </Menu.Item>
-        </Menu>
-      }>{r.status > 0 ? 'Stop' : 'Run'}</Dropdown.Button>
+      <React.Fragment>
+        <Dropdown.Button type="ghost" onClick={handleTraderSwitch.bind(null, r)} overlay={
+          <Menu>
+            <Menu.Item key="log">
+              <a type="ghost" onClick={handleTraderLog.bind(null, r)}>View Log</a>
+            </Menu.Item>
+            <Menu.Item key="delete">
+              <a type="ghost" onClick={handleTraderDelete.bind(null, r)}>Delete It</a>
+            </Menu.Item>
+          </Menu>
+        }>{r.status > 0 ? 'Stop' : 'Run'}</Dropdown.Button>
+
+
+        <Popconfirm title="回测任务数据默认只提供binance数据" okText="确定" cancelText="取消" onConfirm={onHandleBackTesting.bind(null, r)}>
+          <Dropdown.Button type="ghost" overlay={
+            <Menu>
+              <Menu.Item key="backTesting">
+                <a type="ghost">backTesting</a>
+              </Menu.Item>
+            </Menu>
+          }>backTesting</Dropdown.Button>
+        </Popconfirm>
+      </React.Fragment>
     ),
   }];
 

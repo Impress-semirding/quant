@@ -1,6 +1,5 @@
-import React, { useEffect } from 'react';
-import { Button, Space, Checkbox, Form, Input, Table, Tag, Modal, message } from 'antd';
-import type { ColumnsType } from 'antd/lib/table';
+import React, { useState, useEffect } from 'react';
+import { Button, Space, Table, message } from 'antd';
 
 import { Values } from './type';
 import TaskCreateForm from './task';
@@ -9,19 +8,16 @@ import { IConfigTaskItem } from '../../actions/apiConfig';
 import { sleep } from '../../utils';
 import styles from './index.module.scss';
 
-
-interface DataType {
-  key: string;
-  name: string;
-  title: string;
-  address: string;
-  render: () => Element;
+interface Iperiod {
+  7: "1H",
+  10: "4H",
+  14: "1D"
 }
 
-interface Iperiod {
-  7: string,
-  10: string,
-  14: string,
+const periods: Iperiod = {
+  7: "1H",
+  10: "4H",
+  14: "1D"
 }
 
 const columns = [
@@ -51,12 +47,7 @@ const columns = [
     dataIndex: 'period',
     key: 'period',
     render: (period: 7 | 10 | 14) => {
-      const m: Iperiod = {
-        7: "1H",
-        10: "4H",
-        14: "1D"
-      }
-      return m[period]
+      return periods[period]
     }
   },
   {
@@ -72,8 +63,6 @@ const columns = [
     }
   }
 ];
-
-const { useState } = React;
 
 export default function Quote() {
   const [data, setSata] = useState<IConfigTaskItem[]>([]);
