@@ -105,8 +105,8 @@ func initialize(id int64) (trader Global, err error) {
 	return
 }
 
-func run(id int64, apis []model.ApiConfig) (err error) {
-	trader, err := initialize(id)
+func run(apiId int64, apis []model.ApiConfig) (err error) {
+	trader, err := initialize(apiId)
 	if err != nil {
 		return
 	}
@@ -133,11 +133,11 @@ func run(id int64, apis []model.ApiConfig) (err error) {
 
 		if subscribe, err := trader.ctx.Get("subscribe"); err == nil && subscribe.IsFunction() {
 			//	这里需要开发group chan接口，做多任务订阅
-			ids := []int64{}
+			taskIds := []int64{}
 			for _, v := range apis {
-				ids = append(ids, v.ID)
+				taskIds = append(taskIds, v.ID)
 			}
-			taskLib.RunGroupTask(ids, id, runClientSubscribe(trader, subscribe))
+			taskLib.RunGroupTask(taskIds, apiId, runClientSubscribe(trader, subscribe))
 		} else if main, err := trader.ctx.Get("main"); err != nil || !main.IsFunction() {
 			trader.Logger.Log(constant.ERROR, "", 0.0, 0.0, "Can not get the main function")
 		} else {

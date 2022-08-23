@@ -1,6 +1,7 @@
 package task
 
 import (
+	"fmt"
 	"sync"
 )
 
@@ -27,13 +28,19 @@ var eb = &EventBus{
 
 func (eb *EventBus) Publish(topic string, data interface{}) {
 	eb.rm.RLock()
-	if chans, found := eb.subscribers[topic]; found {
-		channels := append(DataChannelSlice{}, chans...)
-		go func(data DataEvent, dataChannelSlices DataChannelSlice) {
-			for _, m := range dataChannelSlices {
-				m.ch <- data
+	if chanList, found := eb.subscribers[topic]; found {
+		channels := append(DataChannelSlice{}, chanList...)
+		data := DataEvent{Data: data, Topic: topic}
+
+		for _, m := range channels {
+			ch := m.ch
+			fmt.Printf("Len: %d\n", len(ch))
+			fmt.Printf("Capacity: %d\n", cap(ch))
+			if cap(ch) == len(ch) {
+				<-ch
 			}
-		}(DataEvent{Data: data, Topic: topic}, channels)
+			m.ch <- data
+		}
 	}
 	eb.rm.RUnlock()
 }

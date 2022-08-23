@@ -115,8 +115,9 @@ func (apiConfig) Run(id int, ctx rpc.Context) (resp response) {
 
 	fmt.Println("topic", topic)
 
-	task.Sub(99999, outputChan)
-	task.Run(runTask)
+	ch := task.Sub(99999)
+	go runSub(ch)
+	go task.Run(runTask)
 
 	resp.Success = true
 	return
@@ -129,11 +130,12 @@ func (apiConfig) Stop(id int64, ctx rpc.Context) (resp response) {
 	return resp
 }
 
-func outputChan(ch chan taskLib.DataEvent) {
+func runSub(ch chan taskLib.DataEvent) {
 	for {
 		select {
 		case d := <-ch:
 			fmt.Println("ch:", d)
+
 		}
 	}
 }
@@ -153,12 +155,11 @@ func runTask(task *taskLib.Task) {
 				data, err := client.GetKlineRecords("BTC-USDT", goex.KlinePeriod(taskConfig.Period), 100)
 				if err == nil {
 					fmt.Println("end taskConfig.Period", taskConfig.Period)
+					//	sync
 					task.Pub(data)
 					time.Sleep(500 * time.Millisecond)
 				}
 			}
-
 		}
 	}
-
 }

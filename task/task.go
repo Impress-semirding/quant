@@ -32,21 +32,20 @@ func (t *Task) Run(taskfunc RunTaskFucType) {
 	t.status = 1
 	ExecutorTask[t.TaskId] = t
 
-	go taskfunc(t)
+	taskfunc(t)
 }
 
 func (t *Task) Pub(data interface{}) {
-	go eb.Publish(t.Topic, data)
+	eb.Publish(t.Topic, data)
 }
 
-func (t *Task) Sub(id int64, callback SubscribeFuncType) (c chan DataEvent) {
-	ch := make(chan DataEvent)
+func (t *Task) Sub(id int64) (c chan DataEvent) {
+	ch := make(chan DataEvent, 1)
 	idCh := DataChannel{
 		ch: ch,
 		id: id,
 	}
 	eb.Subscribe(t.Topic, idCh)
-	go callback(ch)
 
 	return ch
 }
