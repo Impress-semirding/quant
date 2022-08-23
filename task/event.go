@@ -36,9 +36,6 @@ func (eb *EventBus) Publish(topic string, data interface{}) {
 			ch := m.ch
 			fmt.Printf("Len: %d\n", len(ch))
 			fmt.Printf("Capacity: %d\n", cap(ch))
-			if cap(ch) == len(ch) {
-				<-ch
-			}
 			m.ch <- data
 		}
 	}
@@ -69,4 +66,17 @@ func (eb *EventBus) removeListener(topic string, id int64) {
 		}
 	}
 	eb.rm.Unlock()
+}
+
+func (eb *EventBus) FlushTopicChan(topic string) {
+	eb.rm.RLock()
+	if chanList, found := eb.subscribers[topic]; found {
+		channels := append(DataChannelSlice{}, chanList...)
+		for _, m := range channels {
+			if cap(m.ch) == len(m.ch) {
+				<-m.ch
+			}
+		}
+	}
+	eb.rm.RUnlock()
 }

@@ -36,6 +36,8 @@ func (t *Task) Run(taskfunc RunTaskFucType) {
 }
 
 func (t *Task) Pub(data interface{}) {
+	//	chan size 1,当最新的kline数据到了，刷新chan为空，保证消费端获取到的数据最新
+	eb.FlushTopicChan(t.Topic)
 	eb.Publish(t.Topic, data)
 }
 
