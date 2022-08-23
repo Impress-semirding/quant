@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"github.com/Impress-semirding/quant/trader"
 
 	"github.com/Impress-semirding/quant/constant"
 	"github.com/Impress-semirding/quant/model"
@@ -102,5 +103,29 @@ func (algorithm) Delete(ids []int64, ctx rpc.Context) (resp response) {
 	} else {
 		resp.Success = true
 	}
+	return
+}
+
+//	回测
+func (algorithm) BackTesting(id int64, ctx rpc.Context) (resp response) {
+	username := ctx.GetString("username")
+	if username == "" {
+		resp.Message = constant.ErrAuthorizationError
+		return
+	}
+	self, err := model.GetUser(username)
+
+	algorithm, err := self.GetAlgorithm(id)
+	if err != nil {
+		resp.Message = fmt.Sprint(err)
+		return
+	}
+
+	if err := trader.RunBackTesting(id, algorithm); err != nil {
+		resp.Message = fmt.Sprint(err)
+		return
+	}
+
+	resp.Success = true
 	return
 }

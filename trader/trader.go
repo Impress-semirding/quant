@@ -1,14 +1,19 @@
 package trader
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
+	"github.com/nntaoli-project/goex"
+	"os"
+	"os/signal"
 	"time"
 
 	"github.com/Impress-semirding/quant/api"
 	"github.com/Impress-semirding/quant/constant"
 	"github.com/Impress-semirding/quant/model"
 	taskLib "github.com/Impress-semirding/quant/task"
+	sim2 "github.com/nntaoli-project/goex_backtest/sim"
+	strategies "github.com/nntaoli-project/goex_backtest/strategies"
 	"github.com/robertkrimen/otto"
 )
 
@@ -29,7 +34,6 @@ func GetTraderStatus(id int64) (status int64) {
 	return
 }
 
-// Switch ...
 func Switch(id int64, api []model.ApiConfig) (err error) {
 	if GetTraderStatus(id) > 0 {
 		return stop(id, api)
@@ -41,7 +45,6 @@ func Switch(id int64, api []model.ApiConfig) (err error) {
 	return nil
 }
 
-//核心是初始化js运行环境，及其可以调用的api
 func initialize(id int64) (trader Global, err error) {
 	if t := Executor[id]; t != nil && t.Status > 0 {
 		return
@@ -146,8 +149,78 @@ func run(id int64, apis []model.ApiConfig) (err error) {
 	return
 }
 
-func RunBackTesting(id int64) error {
+func RunBackTesting(id int64, algorithm model.Algorithm) error {
+	sim := sim2.NewExchangeSimWithTomlConfig(goex.BINANCE)
+	trader, err := initializeBackTestingVM(sim)
+	if err != nil {
+		return err
+	}
+	go func() {
+		defer func() {
+			if err := recover(); err != nil && err != errHalt {
+				trader.Logger.Log(constant.ERROR, "", 0.0, 0.0, err)
+			}
+			if exit, err := trader.ctx.Get("exit"); err == nil && exit.IsFunction() {
+				if _, err := exit.Call(exit); err != nil {
+					trader.Logger.Log(constant.ERROR, "", 0.0, 0.0, err)
+				}
+			}
+			trader.Status = 0
+		}()
+		trader.LastRunAt = time.Now()
+		trader.Status = 1
+		Executor[trader.ID] = &trader
+
+		// RUN javascript
+		if _, err := trader.ctx.Run(algorithm.Script); err != nil {
+			trader.Logger.Log(constant.ERROR, "", 0.0, 0.0, err)
+		}
+
+		if subscribe, err := trader.ctx.Get("subscribe"); err == nil && subscribe.IsFunction() {
+			ctx, cancel := context.WithCancel(context.Background())
+			go func() {
+				sig := make(chan os.Signal, 1)
+				signal.Notify(sig, os.Interrupt, os.Kill)
+				for {
+					select {
+					case <-sig:
+						cancel()
+						return
+					}
+				}
+			}()
+
+			backtestStatistics := sim2.NewBacktestStatistics([]*sim2.ExchangeSim{sim})
+
+			strategy := strategies.NewDoubleMovingStrategy(sim, goex.KLINE_PERIOD_1MIN, 600, 150, goex.BTC_USDT)
+			// subscribe need run by backtest.Main
+			strategy.Main(subscribe, ctx)
+
+			backtestStatistics.NetAssetReport()
+			backtestStatistics.OrderReport()
+			backtestStatistics.TaLibReport()
+		}
+	}()
 	return nil
+}
+
+func initializeBackTestingVM(sim *sim2.ExchangeSim) (Global, error) {
+	trader := Global{}
+	trader.tasks = make(Tasks)
+	trader.ctx = otto.New()
+	trader.ctx.Interrupt = make(chan func(), 1)
+	for _, c := range constant.Consts {
+		trader.ctx.Set(c, c)
+	}
+
+	trader.ctx.Set("Global", &trader)
+	trader.ctx.Set("G", &trader)
+	trader.ctx.Set("Exchange", sim)
+	trader.ctx.Set("E", sim)
+	trader.ctx.Set("Exchanges", sim)
+	trader.ctx.Set("Es", sim)
+	trader.ctx.Set("Talib", Talib{})
+	return trader, nil
 }
 
 func runClientSubscribe(trader Global, subscribe otto.Value) func(data []interface{}) {
@@ -177,14 +250,4 @@ func stop(id int64, apis []model.ApiConfig) (err error) {
 	trader.Status = 0
 	delete(Executor, id)
 	return
-}
-
-func toMap(input interface{}) (map[string]interface{}, error) {
-	data := make(map[string]interface{})
-	j, _ := json.Marshal(input)
-	if err := json.Unmarshal(j, &data); err != nil {
-		return nil, err
-	}
-
-	return data, nil
 }

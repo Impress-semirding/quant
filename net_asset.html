@@ -1,0 +1,40 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>净值</title>
+    <script src="https://go-echarts.github.io/go-echarts-assets/assets/echarts.min.js"></script>
+    <link href="https://go-echarts.github.io/go-echarts-assets/assets/bulma.min.css" rel="stylesheet">
+</head>
+
+<body>
+<div class="select" style="margin-right:10px; margin-top:10px; position:fixed; right:10px;"></div>
+
+<div class="container">
+    <div class="item" id="JVPJuuGNkFlP"
+         style="width:1080px;height:500px;"></div>
+</div>
+<script type="text/javascript">
+    "use strict";
+    var myChart_JVPJuuGNkFlP = echarts.init(document.getElementById('JVPJuuGNkFlP'), "white");
+    var option_JVPJuuGNkFlP = {
+        title: {"text":"回测","subtext":"https://github.com/nntaoli-project/goex_backtest",},
+        tooltip: {},
+        legend: {},
+        xAxis: [{"data":null,"splitArea":{"show":false,},"splitLine":{"show":false,}}],
+        yAxis: [{"axisLabel":{"show":true},"scale":true,"splitArea":{"show":false,},"splitLine":{"show":true,}}],
+        series: [
+        {"name":"净值","type":"line","data":null,"label":{"show":false},"emphasis":{"label":{"show":false},},"markLine":{"label":{"show":false}},"markPoint":{"data":[{"name":"最大值","type":"max"},{"name":"最小值","type":"min"}],"label":{"show":true}},},
+        ],
+        color: ["#c23531","#2f4554","#61a0a8","#d48265","#91c7ae","#749f83","#ca8622","#bda29a","#6e7074","#546570","#c4ccd3"],
+    };
+    myChart_JVPJuuGNkFlP.setOption(option_JVPJuuGNkFlP);
+</script>
+
+<style>
+    .container {margin-top:30px; display: flex;justify-content: center;align-items: center;}
+    .item {margin: auto;}
+</style>
+</body>
+</html>

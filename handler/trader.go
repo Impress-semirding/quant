@@ -173,25 +173,3 @@ func (runner) Switch(req model.Trader, ctx rpc.Context) (resp response) {
 	resp.Success = true
 	return
 }
-
-//	回测
-func (runner) BackTesting(id int64, ctx rpc.Context) (resp response) {
-	username := ctx.GetString("username")
-	if username == "" {
-		resp.Message = constant.ErrAuthorizationError
-		return
-	}
-	_, err := model.GetUser(username)
-	if err != nil {
-		resp.Message = fmt.Sprint(err)
-		return
-	}
-
-	if err := trader.RunBackTesting(id); err != nil {
-		resp.Message = fmt.Sprint(err)
-		return
-	}
-
-	resp.Success = true
-	return
-}

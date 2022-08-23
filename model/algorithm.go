@@ -20,7 +20,6 @@ type Algorithm struct {
 	Traders []Trader `gorm:"-" json:"traders"`
 }
 
-// ListAlgorithm ...
 func (user User) ListAlgorithm(size, page int64, order string) (total int64, algorithms []Algorithm, err error) {
 	_, users, err := user.ListUser(-1, 1, "id")
 	if err != nil {
@@ -38,5 +37,18 @@ func (user User) ListAlgorithm(size, page int64, order string) (total int64, alg
 		size = 1000
 	}
 	err = DB.Where("user_id in (?)", userIDs).Order(toUnderScoreCase(order)).Limit(size).Offset((page - 1) * size).Find(&algorithms).Error
+	return
+}
+
+func (user User) GetAlgorithm(id int64) (algorithm Algorithm, err error) {
+	_, users, err := user.ListUser(-1, 1, "id")
+	if err != nil {
+		return
+	}
+	userIDs := []int64{}
+	for _, u := range users {
+		userIDs = append(userIDs, u.ID)
+	}
+	err = DB.Where("user_id in (?)", userIDs).First(&algorithm, id).Error
 	return
 }
