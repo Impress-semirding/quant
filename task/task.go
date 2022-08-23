@@ -23,7 +23,7 @@ var (
 	ExecutorTask = make(map[int64]*Task)
 )
 
-func (t *Task) Run(taskfunc RunTaskFucType) {
+func (t *Task) Run(taskCore RunTaskFucType) {
 	if t := ExecutorTask[t.TaskId]; t != nil && t.status > 0 {
 		fmt.Println("任务正在执行中...请勿连续执行")
 		return
@@ -32,7 +32,7 @@ func (t *Task) Run(taskfunc RunTaskFucType) {
 	t.status = 1
 	ExecutorTask[t.TaskId] = t
 
-	taskfunc(t)
+	taskCore(t)
 }
 
 func (t *Task) Pub(data interface{}) {

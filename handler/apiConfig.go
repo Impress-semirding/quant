@@ -117,7 +117,7 @@ func (apiConfig) Run(id int, ctx rpc.Context) (resp response) {
 
 	ch := task.Sub(99999)
 	go runSub(ch)
-	go task.Run(runTask)
+	go task.Run(taskCore)
 
 	resp.Success = true
 	return
@@ -140,7 +140,7 @@ func runSub(ch chan taskLib.DataEvent) {
 	}
 }
 
-func runTask(task *taskLib.Task) {
+func taskCore(task *taskLib.Task) {
 	ctx := task.Ctx
 	taskConfig := task.ApiConfig
 	for {
