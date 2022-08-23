@@ -107,21 +107,24 @@ func initialize(id int64) (trader Global, err error) {
 
 func run(apiId int64, apis []model.ApiConfig) (err error) {
 	trader, err := initialize(apiId)
-	if err != nil {
+	if err == nil {
+		fmt.Println("initialize task error")
 		return
 	}
-	go func() {
-		defer func() {
-			if err := recover(); err != nil && err != errHalt {
+
+	defer func() {
+		if err := recover(); err != nil && err != errHalt {
+			trader.Logger.Log(constant.ERROR, "", 0.0, 0.0, err)
+		}
+		if exit, err := trader.ctx.Get("exit"); err == nil && exit.IsFunction() {
+			if _, err := exit.Call(exit); err != nil {
 				trader.Logger.Log(constant.ERROR, "", 0.0, 0.0, err)
 			}
-			if exit, err := trader.ctx.Get("exit"); err == nil && exit.IsFunction() {
-				if _, err := exit.Call(exit); err != nil {
-					trader.Logger.Log(constant.ERROR, "", 0.0, 0.0, err)
-				}
-			}
-			trader.Status = 0
-		}()
+		}
+		trader.Status = 0
+	}()
+
+	go func() {
 		trader.LastRunAt = time.Now()
 		trader.Status = 1
 		Executor[trader.ID] = &trader
