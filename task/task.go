@@ -35,8 +35,8 @@ func (t *Task) Run(taskCore RunTaskFucType) {
 	taskCore(t)
 }
 
+//	没有被消费的k线数据在下次数据到来时被丢弃，保证消费端数据相对较新
 func (t *Task) Pub(data interface{}) {
-	//	chan size 1,当最新的kline数据到了，刷新chan为空，保证消费端获取到的数据最新
 	eb.FlushTopicChan(t.Topic)
 	eb.Publish(t.Topic, data)
 }
