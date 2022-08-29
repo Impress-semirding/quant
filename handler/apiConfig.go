@@ -102,22 +102,10 @@ func (apiConfig) Run(id int, ctx rpc.Context) (resp response) {
 	}
 
 	topic := taskConfig.ExchangeType + "-" + taskConfig.FuncName + "-" + taskConfig.InstId + "-" + fmt.Sprint(taskConfig.Period)
-	fmt.Println("topic", topic)
-
-	cctx, cancel := context.WithCancel(context.Background())
-	task := taskLib.Task{
-		TaskId:    taskConfig.ID,
-		Topic:     topic,
-		ApiConfig: taskConfig,
-		Ctx:       cctx,
-		Cancel:    cancel,
-	}
-
-	fmt.Println("topic", topic)
-
+	task := taskLib.NewTask(taskConfig.ID, topic, taskConfig)
 	ch := task.Sub(99999)
-	go runSub(ch)
-	go task.Run(taskCore)
+	go listenTask(ch)
+	go task.Run(fetcher)
 
 	resp.Success = true
 	return
@@ -130,7 +118,7 @@ func (apiConfig) Stop(id int64, ctx rpc.Context) (resp response) {
 	return resp
 }
 
-func runSub(ch chan taskLib.DataEvent) {
+func listenTask(ch chan taskLib.DataEvent) {
 	for {
 		select {
 		case d := <-ch:
@@ -140,7 +128,7 @@ func runSub(ch chan taskLib.DataEvent) {
 	}
 }
 
-func taskCore(ctx context.Context, task taskLib.Task) {
+func fetcher(ctx context.Context, task taskLib.Task) {
 	taskConfig := task.ApiConfig
 	for {
 		select {

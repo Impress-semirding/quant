@@ -8,22 +8,32 @@ import (
 	cmap "github.com/orcaman/concurrent-map/v2"
 )
 
-type Task struct {
-	TaskId int64
-	Topic  string
-	status int64
-	Ctx    context.Context
-	Cancel context.CancelFunc
-	model.ApiConfig
-}
-
-type SubscribeFuncType = func(ch chan DataEvent)
-
 type ServiceTask = func(ctx context.Context, t Task)
 
 var (
 	executorTask = cmap.New[Task]()
 )
+
+type Task struct {
+	TaskId int64
+	Topic  string
+	status int64
+	model.ApiConfig
+	Ctx    context.Context
+	Cancel context.CancelFunc
+}
+
+func NewTask(id int64, topic string, taskConfig model.ApiConfig) Task {
+	ctx, cancel := context.WithCancel(context.Background())
+	return Task{
+		//	TaskId,Topic,ApiConfig3个字段后续需要对外影藏
+		TaskId:    taskConfig.ID,
+		Topic:     topic,
+		ApiConfig: taskConfig,
+		Ctx:       ctx,
+		Cancel:    cancel,
+	}
+}
 
 func (t *Task) Run(serviceTask ServiceTask) {
 	_, ok := executorTask.Get(fmt.Sprint(t.TaskId))
