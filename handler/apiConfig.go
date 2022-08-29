@@ -103,8 +103,15 @@ func (apiConfig) Run(id int, ctx rpc.Context) (resp response) {
 
 	topic := taskConfig.ExchangeType + "-" + taskConfig.FuncName + "-" + taskConfig.InstId + "-" + fmt.Sprint(taskConfig.Period)
 	task := taskLib.NewTask(taskConfig.ID, topic, taskConfig)
+	defer func() {
+		if p := recover(); p != nil {
+			task.RemoveListener(99999)
+			task.Cancel()
+		}
+	}()
+
 	ch := task.Sub(99999)
-	go listenTask(ch)
+	go listenTask(task.Ctx, ch)
 	go task.Run(fetcher)
 
 	resp.Success = true
@@ -118,9 +125,12 @@ func (apiConfig) Stop(id int64, ctx rpc.Context) (resp response) {
 	return resp
 }
 
-func listenTask(ch chan taskLib.DataEvent) {
+func listenTask(ctx context.Context, ch chan taskLib.DataEvent) {
 	for {
 		select {
+		case <-ctx.Done():
+			fmt.Printf("listenTask:ctx.Done")
+			return
 		case d := <-ch:
 			fmt.Println("ch:", d)
 
@@ -133,7 +143,7 @@ func fetcher(ctx context.Context, task taskLib.Task) {
 	for {
 		select {
 		case <-ctx.Done():
-			fmt.Printf("ctx.Done")
+			fmt.Printf("fetcher:ctx.Done")
 			return
 		default:
 			if maker, ok := trader.ExchangeMaker[taskConfig.ExchangeType]; ok {
