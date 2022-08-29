@@ -3,10 +3,11 @@ package trader
 import (
 	"context"
 	"fmt"
-	"github.com/nntaoli-project/goex"
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/nntaoli-project/goex"
 
 	"github.com/Impress-semirding/quant/api"
 	"github.com/Impress-semirding/quant/constant"
@@ -245,7 +246,11 @@ func stop(id int64, apis []model.ApiConfig) (err error) {
 	taskIds := []int64{}
 	for _, v := range apis {
 		taskIds = append(taskIds, v.ID)
-		task := taskLib.GetTask(v.ID)
+		task, err := taskLib.GetTask(v.ID)
+
+		if err != nil {
+			continue
+		}
 		task.RemoveListener(id)
 	}
 

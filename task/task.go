@@ -3,7 +3,9 @@ package task
 import (
 	"context"
 	"fmt"
+
 	"github.com/Impress-semirding/quant/model"
+	cmap "github.com/orcaman/concurrent-map/v2"
 )
 
 type Task struct {
@@ -17,25 +19,56 @@ type Task struct {
 
 type SubscribeFuncType = func(ch chan DataEvent)
 
-type RunTaskFucType = func(t *Task)
+type ServiceTask = func(ctx context.Context, t Task)
 
 var (
-	ExecutorTask = make(map[int64]*Task)
+	executorTask = cmap.New[Task]()
 )
 
-func (t *Task) Run(taskCore RunTaskFucType) {
-	if t := ExecutorTask[t.TaskId]; t != nil && t.status > 0 {
+func (t *Task) Run(serviceTask ServiceTask) {
+	_, ok := executorTask.Get(fmt.Sprint(t.TaskId))
+	if ok {
 		fmt.Println("任务正在执行中...请勿连续执行")
 		return
 	}
 
 	t.status = 1
-	ExecutorTask[t.TaskId] = t
+	executorTask.Set(fmt.Sprint(t.TaskId), *t)
 
-	taskCore(t)
+	serviceTask(t.Ctx, *t)
 }
 
-//	没有被消费的k线数据在下次数据到来时被丢弃，保证消费端数据相对较新
+func Stop(id int64) (bool, error) {
+	task, err := GetTask(id)
+	if err != nil {
+		return false, err
+	}
+	task.Cancel()
+	task.status = 0
+	executorTask.Remove(fmt.Sprint(task.TaskId))
+
+	return true, nil
+}
+
+func GetTask(id int64) (Task, error) {
+	if task, ok := executorTask.Get(fmt.Sprint(id)); ok {
+		return task, nil
+	}
+
+	return Task{}, fmt.Errorf("任务不存在")
+}
+
+func GetTaskStatus(id int64) (status int64) {
+	task, err := GetTask(id)
+
+	if err != nil {
+		return 0
+	}
+
+	return task.status
+}
+
+//	没有被消费的k线数据在下次数据到来时被丢弃，保证消费端数据相对较新,这里数据处理模型需要更新机制==
 func (t *Task) Pub(data interface{}) {
 	eb.FlushTopicChan(t.Topic)
 	eb.Publish(t.Topic, data)
@@ -54,43 +87,4 @@ func (t *Task) Sub(id int64) (c chan DataEvent) {
 
 func (t *Task) RemoveListener(id int64) {
 	eb.removeListener(t.Topic, id)
-}
-
-func Stop(id int64) bool {
-	defer func() {
-		t := GetTask(id)
-		if t == nil {
-			return
-		}
-		t.status = 0
-		delete(ExecutorTask, t.TaskId)
-	}()
-
-	_, cancel := GetContext(id)
-	cancel()
-
-	return true
-}
-
-func GetTaskStatus(id int64) (status int64) {
-	if t, ok := ExecutorTask[id]; ok && t != nil {
-		status = t.status
-	}
-	return
-}
-
-func GetTask(id int64) (t *Task) {
-	if id == 0 {
-		return nil
-	}
-	task := ExecutorTask[id]
-	return task
-}
-
-func GetContext(id int64) (c context.Context, cancel context.CancelFunc) {
-	if id == 0 {
-		return nil, nil
-	}
-	task := ExecutorTask[id]
-	return task.Ctx, task.Cancel
 }

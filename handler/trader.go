@@ -158,8 +158,9 @@ func (runner) Switch(req model.Trader, ctx rpc.Context) (resp response) {
 	}
 
 	for _, taskConf := range api {
-		task := taskLib.GetTask(taskConf.ID)
-		if task == nil {
+		_, err := taskLib.GetTask(taskConf.ID)
+
+		if err != nil {
 			resp.Message = fmt.Sprint("交易所api任务未运行，无法订阅api数据")
 			return
 		}

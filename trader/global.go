@@ -15,6 +15,13 @@ import (
 	"github.com/robertkrimen/otto"
 )
 
+//js中的一个任务,目的是可以并发工作
+type task struct {
+	ctx  *otto.Otto    //js虚拟机
+	fn   otto.Value    //代表该任务的js函数
+	args []interface{} //函数的参数
+}
+
 type Tasks map[string][]task
 
 // Global ...
@@ -27,13 +34,6 @@ type Global struct {
 	tasks   Tasks //任务列表
 	running bool
 	//statusLog string
-}
-
-//js中的一个任务,目的是可以并发工作
-type task struct {
-	ctx  *otto.Otto    //js虚拟机
-	fn   otto.Value    //代表该任务的js函数
-	args []interface{} //函数的参数
 }
 
 // Sleep ...

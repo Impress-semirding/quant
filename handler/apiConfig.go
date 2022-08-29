@@ -140,8 +140,7 @@ func runSub(ch chan taskLib.DataEvent) {
 	}
 }
 
-func taskCore(task *taskLib.Task) {
-	ctx := task.Ctx
+func taskCore(ctx context.Context, task taskLib.Task) {
 	taskConfig := task.ApiConfig
 	for {
 		select {

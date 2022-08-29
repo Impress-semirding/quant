@@ -33,6 +33,7 @@ require (
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/lib/pq v0.0.0-20180523175426-90697d60dd84 // indirect
 	github.com/mattn/go-sqlite3 v1.9.1-0.20180719091609-b3511bfdd742 // indirect
+	github.com/orcaman/concurrent-map/v2 v2.0.0 // indirect
 	github.com/smartystreets/goconvey v1.7.2 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
