@@ -51,12 +51,7 @@ func (runner) Put(req model.Trader, ctx rpc.Context) (resp response) {
 		resp.Message = fmt.Sprint(err)
 		return
 	}
-	db, err := model.NewOrm()
-	if err != nil {
-		resp.Message = fmt.Sprint(err)
-		return
-	}
-	defer db.Close()
+	db := model.DB
 	db = db.Begin()
 	if req.ID > 0 {
 		if err := self.UpdateTrader(req); err != nil {
@@ -149,7 +144,7 @@ func (runner) Switch(req model.Trader, ctx rpc.Context) (resp response) {
 	var ids = []string{}
 	if req.ID > 0 {
 		model.DB.Where("id = ?", req.ID).Find(&traders)
-		model.DB.Model(traders).Related(&traderApis)
+		model.DB.Model(&traders).Association("Api").Find(&traderApis)
 		for _, v := range traderApis {
 			s, _ := conver.String(v.ApiConfigID)
 			ids = append(ids, s)

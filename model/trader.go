@@ -2,9 +2,9 @@ package model
 
 import (
 	"fmt"
-	"time"
-
 	"github.com/Impress-semirding/quant/constant"
+	"github.com/pkg/errors"
+	"time"
 )
 
 // Trader struct
@@ -95,29 +95,25 @@ func (user User) GetTraderExchanges(id interface{}) (traderExchanges []TraderExc
 
 // UpdateTrader ...
 func (user User) UpdateTrader(req Trader) (err error) {
-	db, err := NewOrm()
-	if err != nil {
-		return err
-	}
-	defer db.Close()
+	db := DB
 	db = db.Begin()
 	runner := Trader{}
 	if err := db.First(&runner, req.ID).Error; err != nil {
 		db.Rollback()
-		return err
+		return errors.Wrapf(err, "UpdateTrader.db.First")
 	}
 	runner.Name = req.Name
 	runner.Environment = req.Environment
 	rs, err := user.GetTraderExchanges(runner.ID)
 	if err != nil {
 		db.Rollback()
-		return err
+		return errors.Wrapf(err, "UpdateTrader.user.GetTraderExchanges")
 	}
 	for i, r := range rs {
 		if i >= len(req.Exchanges) {
 			if err := db.Delete(&r).Error; err != nil {
 				db.Rollback()
-				return err
+				return errors.Wrapf(err, "UpdateTrader.db.Delete")
 			}
 			continue
 		}
@@ -127,7 +123,7 @@ func (user User) UpdateTrader(req Trader) (err error) {
 		r.ExchangeID = req.Exchanges[i].ID
 		if err := db.Save(&r).Error; err != nil {
 			db.Rollback()
-			return err
+			return errors.Wrapf(err, "UpdateTrader.db.Save")
 		}
 	}
 	for i, e := range req.Exchanges {
@@ -140,16 +136,16 @@ func (user User) UpdateTrader(req Trader) (err error) {
 		}
 		if err := db.Create(&r).Error; err != nil {
 			db.Rollback()
-			return err
+			return errors.Wrapf(err, "UpdateTrader.db.Create")
 		}
 	}
 	if err := db.Save(&runner).Error; err != nil {
 		db.Rollback()
-		return err
+		return errors.Wrapf(err, "UpdateTrader.db.Save(&runner)")
 	}
 	if err := db.Commit().Error; err != nil {
 		db.Rollback()
-		return err
+		return errors.Wrapf(err, "UpdateTrader.db.Commit()")
 	}
 	return
 }

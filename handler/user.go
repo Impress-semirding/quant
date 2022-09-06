@@ -52,7 +52,7 @@ func (user) Get(_ string, ctx rpc.Context) (resp response) {
 }
 
 // List ...
-func (user) List(size, page int64, order string, ctx rpc.Context) (resp response) {
+func (user) List(size, page int, order string, ctx rpc.Context) (resp response) {
 	username := ctx.GetString("username")
 	if username == "" {
 		resp.Message = constant.ErrAuthorizationError

@@ -25,7 +25,7 @@ type Log struct {
 }
 
 // ListLog ...
-func (user User) ListLog(id, size, page int64) (total int64, logs []Log, err error) {
+func (user User) ListLog(id, size, page int) (total int64, logs []Log, err error) {
 	err = DB.Model(&Log{}).Where("trader_id = ?", id).Count(&total).Error
 	if err != nil {
 		return

@@ -11,9 +11,9 @@ import (
 type logger struct{}
 
 type pagination struct {
-	Current  int64
-	PageSize int64
-	Total    int64
+	Current  int
+	PageSize int
+	Total    int
 }
 
 type filters struct {
@@ -21,7 +21,7 @@ type filters struct {
 	ExchangeType []string
 }
 
-func (logger) List(traderId int64, pagination pagination, filters filters, ctx rpc.Context) (resp response) {
+func (logger) List(traderId int, pagination pagination, filters filters, ctx rpc.Context) (resp response) {
 	username := ctx.GetString("username")
 	if username == "" {
 		resp.Message = constant.ErrAuthorizationError

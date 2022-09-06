@@ -1,6 +1,7 @@
 package model
 
 import (
+	"github.com/pkg/errors"
 	"time"
 )
 
@@ -16,8 +17,12 @@ type User struct {
 }
 
 // GetUserByID ...
-func GetUserByID(id interface{}) (user User, err error) {
-	err = DB.First(&user, id).Error
+func GetUserByID(id interface{}) (user User, e error) {
+	err := DB.First(&user, id).Error
+	if err != nil {
+		e = errors.Wrap(err, "GetUserByID error")
+	}
+
 	return
 }
 
@@ -28,7 +33,7 @@ func GetUser(username interface{}) (user User, err error) {
 }
 
 // ListUser ...
-func (user User) ListUser(size, page int64, order string) (total int64, users []User, err error) {
+func (user User) ListUser(size, page int, order string) (total int64, users []User, err error) {
 	err = DB.Model(&User{}).Where("level < ? OR id = ?", user.Level, user.ID).Count(&total).Error
 	if err != nil {
 		return

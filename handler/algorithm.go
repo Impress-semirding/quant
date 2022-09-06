@@ -12,7 +12,7 @@ import (
 type algorithm struct{}
 
 // List ...
-func (algorithm) List(size, page int64, order string, ctx rpc.Context) (resp response) {
+func (algorithm) List(size, page int, order string, ctx rpc.Context) (resp response) {
 	username := ctx.GetString("username")
 	if username == "" {
 		resp.Message = constant.ErrAuthorizationError

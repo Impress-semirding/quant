@@ -1,18 +1,15 @@
 package model
 
 import (
+	"database/sql"
+	"gorm.io/driver/sqlite"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/hprose/hprose-golang/io"
-	"github.com/jinzhu/gorm"
-
+	"gorm.io/gorm"
 	// for db SQL
 	"github.com/Impress-semirding/quant/config"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
 var (
@@ -30,16 +27,22 @@ func init() {
 	io.Register((*Log)(nil), "Log", "json")
 	io.Register((*ApiConfig)(nil), "ApiConfig", "json")
 	var err error
-	DB, err = gorm.Open(strings.ToLower(dbType), dbURL)
+	DB, err = gorm.Open(sqlite.Open(dbURL), &gorm.Config{})
 	if err != nil {
 		log.Printf("Connect to %v database error: %v\n", dbType, err)
-		dbType = "sqlite3"
-		dbURL = "custom/data.db"
-		DB, err = gorm.Open(dbType, dbURL)
-		if err != nil {
-			log.Fatalln("Connect to database error:", err)
-		}
+		log.Fatalln("Connect to database error:", err)
 	}
+	sqlDB, err := DB.DB()
+
+	defer func() {
+		if err := recover(); err != nil {
+			sqlDB.Close()
+		}
+	}()
+
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetMaxOpenConns(100)
+	sqlDB.SetConnMaxLifetime(time.Hour)
 	DB.AutoMigrate(&User{}, &Exchange{}, &Algorithm{}, &ApiConfig{}, &TraderExchange{}, &TraderApiConfig{}, &Trader{}, &Log{})
 	users := []User{}
 	DB.Find(&users)
@@ -53,23 +56,15 @@ func init() {
 			log.Fatalln("Create admin error:", err)
 		}
 	}
-	DB.LogMode(false)
-	go ping()
+	go ping(sqlDB)
 }
 
-func ping() {
+func ping(db *sql.DB) {
 	for {
-		if err := DB.Exec("SELECT 1").Error; err != nil {
+		err := db.Ping()
+		if err != nil {
 			log.Println("Database ping error:", err)
-			if DB, err = gorm.Open(strings.ToLower(dbType), dbURL); err != nil {
-				log.Println("Retry connect to database error:", err)
-			}
 		}
 		time.Sleep(time.Minute)
 	}
-}
-
-// NewOrm ...
-func NewOrm() (*gorm.DB, error) {
-	return gorm.Open(strings.ToLower(dbType), dbURL)
 }
